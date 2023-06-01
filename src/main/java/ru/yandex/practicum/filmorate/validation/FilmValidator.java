@@ -8,6 +8,11 @@ import java.time.LocalDate;
 
 @Component
 public class FilmValidator {
+    /**
+     * Валидация входящего объекта фильма
+     *
+     * @param film Объект, содержащие данные о фильме
+     */
     public void validate(Film film) {
         if (film.getName().isBlank()) {
             throw new ValidationException("Название не может быть пустым");

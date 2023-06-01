@@ -10,7 +10,9 @@ import java.time.LocalDate;
 public class User {
     @NonNull
     private Integer id;
+    @NonNull
     private String email;
+    @NonNull
     private String login;
     private String name;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd.MM.yyyy")
