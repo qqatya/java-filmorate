@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NonNull;
 
+import javax.validation.constraints.Email;
 import java.time.LocalDate;
 
 @Data
@@ -12,6 +13,7 @@ import java.time.LocalDate;
 public class User {
     private Integer id;
     @NonNull
+    @Email
     private String email;
     @NonNull
     private String login;

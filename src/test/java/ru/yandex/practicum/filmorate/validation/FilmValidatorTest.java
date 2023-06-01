@@ -56,17 +56,17 @@ class FilmValidatorTest {
     }
 
     @Test
-    void throwsValidationExceptionExceptionExceptionWhenReleaseDateIsBefore28_12_1985() {
+    void throwsValidationExceptionExceptionExceptionWhenReleaseDateIsBefore28_12_1895() {
         Film fIlm = Film.builder()
                 .id(1)
                 .name("Джедайские практики")
                 .description("Очень джедайские")
-                .releaseDate(LocalDate.of(1985, 12, 27))
+                .releaseDate(LocalDate.of(1895, 12, 27))
                 .duration(140L)
                 .build();
 
         assertThrows(ValidationException.class, () -> filmValidator.validate(fIlm),
-                "Дата релиза не может быть раньше 28 декабря 1985 года");
+                "Дата релиза не может быть раньше 28 декабря 1895 года");
     }
 
     @Test
