@@ -14,6 +14,14 @@ public interface FilmRepository {
     Film insertFilm(Film film);
 
     /**
+     * Обновление фильма
+     *
+     * @param film Объект, содержащий данные для обновления
+     * @return Обновленный фильм
+     */
+    Film updateFilm(Film film);
+
+    /**
      * Получение всех фильмов
      *
      * @return Список фильмов

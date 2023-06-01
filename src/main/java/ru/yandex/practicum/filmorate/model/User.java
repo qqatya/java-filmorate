@@ -10,13 +10,12 @@ import java.time.LocalDate;
 @Data
 @Builder
 public class User {
-    @NonNull
     private Integer id;
     @NonNull
     private String email;
     @NonNull
     private String login;
     private String name;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd.MM.yyyy")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate birthday;
 }

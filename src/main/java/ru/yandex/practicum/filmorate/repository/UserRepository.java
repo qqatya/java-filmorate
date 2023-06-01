@@ -6,12 +6,19 @@ import java.util.List;
 
 public interface UserRepository {
     /**
-     * Создание/обновление пользователя
+     * Создание пользователя
      *
      * @param user Объект, содержащий данные для создания
      * @return Созданный пользователь
      */
     User insertUser(User user);
+
+    /**
+     * Обновление пользователя
+     * @param user Объект, содержащий данные для обновления
+     * @return Обновленный пользователь
+     */
+    User updateUser(User user);
 
     /**
      * Получение всех пользователей
