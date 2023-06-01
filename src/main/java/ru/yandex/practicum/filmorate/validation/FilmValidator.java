@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.validation;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -7,6 +8,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import java.time.LocalDate;
 
 @Component
+@Slf4j
 public class FilmValidator {
     /**
      * Валидация входящего объекта фильма
@@ -26,5 +28,6 @@ public class FilmValidator {
         if (film.getDuration() < 0) {
             throw new ValidationException("Продолжительность фильма не может быть отрицательной");
         }
+        log.debug("Film with id = {} is valid", film.getId());
     }
 }

@@ -16,7 +16,6 @@ public class FilmRepositoryImpl implements FilmRepository {
     @Override
     public Film insertFilm(Film film) {
         films.put(film.getId(), film);
-
         return films.get(film.getId());
     }
 
