@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.ErrorInfo;
@@ -39,6 +40,20 @@ public class ErrorController extends ResponseEntityExceptionHandler {
     @ResponseBody
     public ErrorInfo processUserNotFoundException(UserNotFoundException e) {
         log.debug("Can not find user: {}", e.getMessage());
+        return new ErrorInfo(e.getMessage());
+    }
+
+    /**
+     * Обработчик FilmNotFoundException
+     *
+     * @param e Эксепшн
+     * @return Объект, содержащий сообщение об ошибке
+     */
+    @ExceptionHandler(FilmNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ResponseBody
+    public ErrorInfo processFilmNotFoundException(FilmNotFoundException e) {
+        log.debug("Can not find film: {}", e.getMessage());
         return new ErrorInfo(e.getMessage());
     }
 
