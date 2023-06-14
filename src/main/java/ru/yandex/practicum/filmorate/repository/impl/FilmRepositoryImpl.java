@@ -5,10 +5,7 @@ import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.repository.FilmRepository;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Repository
 @Slf4j
@@ -33,5 +30,12 @@ public class FilmRepositoryImpl implements FilmRepository {
     @Override
     public List<Film> getAllFilms() {
         return new ArrayList<>(films.values());
+    }
+
+    @Override
+    public Optional<Film> getFilmById(Integer id) {
+        return films.values().stream()
+                .filter(film -> Objects.equals(film.getId(), id))
+                .findFirst();
     }
 }

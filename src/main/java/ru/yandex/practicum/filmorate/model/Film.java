@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NonNull;
 
 import java.time.LocalDate;
+import java.util.Set;
 
 @Data
 @Builder
@@ -21,4 +22,5 @@ public class Film {
      * Продолжительность фильма в минутах
      */
     private Long duration;
+    private Set<Long> usersLiked;
 }

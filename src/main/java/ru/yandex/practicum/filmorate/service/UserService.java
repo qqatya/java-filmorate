@@ -27,4 +27,12 @@ public interface UserService {
      * @return Список пользователей
      */
     List<User> getAllUsers();
+
+    /**
+     * Получение пользователя по идентификатору
+     *
+     * @param id Идентификатор пользователя
+     * @return Пользователь
+     */
+    User getUserById(Integer id);
 }

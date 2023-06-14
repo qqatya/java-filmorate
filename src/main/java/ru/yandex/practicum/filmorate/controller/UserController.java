@@ -46,4 +46,15 @@ public class UserController {
         return userService.getAllUsers();
     }
 
+    /**
+     * Получение пользователя по идентификатору
+     *
+     * @param id Идентификатор пользователя
+     * @return Пользователь
+     */
+    @GetMapping("/{id}")
+    public User getUserById(@PathVariable Integer id) {
+        return userService.getUserById(id);
+    }
+
 }

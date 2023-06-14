@@ -11,6 +11,7 @@ import ru.yandex.practicum.filmorate.validation.FilmValidator;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -39,5 +40,15 @@ public class FilmServiceImpl implements FilmService {
     public List<Film> getAllFilms() {
         log.info("Returning all films");
         return filmRepository.getAllFilms();
+    }
+
+    @Override
+    public Film getFilmById(Integer id) {
+        Optional<Film> userOptional = filmRepository.getFilmById(id);
+
+        if (userOptional.isEmpty()) {
+            throw new FilmNotFoundException(String.valueOf(id));
+        }
+        return userOptional.get();
     }
 }

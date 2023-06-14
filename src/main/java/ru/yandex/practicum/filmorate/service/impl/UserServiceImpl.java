@@ -11,6 +11,7 @@ import ru.yandex.practicum.filmorate.validation.UserValidator;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -39,5 +40,15 @@ public class UserServiceImpl implements UserService {
     public List<User> getAllUsers() {
         log.info("Returning all users");
         return userRepository.getAllUsers();
+    }
+
+    @Override
+    public User getUserById(Integer id) {
+        Optional<User> userOptional = userRepository.getUserById(id);
+
+        if (userOptional.isEmpty()) {
+            throw new UserNotFoundException(String.valueOf(id));
+        }
+        return userOptional.get();
     }
 }

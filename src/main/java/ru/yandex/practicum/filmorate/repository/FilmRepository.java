@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.repository;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface FilmRepository {
     /**
@@ -27,5 +28,13 @@ public interface FilmRepository {
      * @return Список фильмов
      */
     List<Film> getAllFilms();
+
+    /**
+     * Получение фильма по идентификатору
+     *
+     * @param id Идентификатор фильма
+     * @return Фильма (пустой, если такого фильма нет)
+     */
+    Optional<Film> getFilmById(Integer id);
 
 }

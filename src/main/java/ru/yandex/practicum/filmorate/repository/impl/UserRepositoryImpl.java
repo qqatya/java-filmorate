@@ -5,10 +5,7 @@ import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.repository.UserRepository;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Repository
 @Slf4j
@@ -33,5 +30,12 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public List<User> getAllUsers() {
         return new ArrayList<>(users.values());
+    }
+
+    @Override
+    public Optional<User> getUserById(Integer id) {
+        return users.values().stream()
+                .filter(user -> Objects.equals(user.getId(), id))
+                .findFirst();
     }
 }

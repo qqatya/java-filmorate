@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.repository;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface UserRepository {
     /**
@@ -26,4 +27,12 @@ public interface UserRepository {
      * @return Список пользователей
      */
     List<User> getAllUsers();
+
+    /**
+     * Получение пользователя по идентификатору
+     *
+     * @param id Идентификатор пользователя
+     * @return Пользователь (пустой, если такого пользователя нет)
+     */
+    Optional<User> getUserById(Integer id);
 }

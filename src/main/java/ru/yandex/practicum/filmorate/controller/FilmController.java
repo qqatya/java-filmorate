@@ -45,4 +45,15 @@ public class FilmController {
     public List<Film> getAllFilms() {
         return filmService.getAllFilms();
     }
+
+    /**
+     * Получение фильма по идентификатору
+     *
+     * @param id Идентификатор фильма
+     * @return Фильм
+     */
+    @GetMapping("/{id}")
+    public Film getFilmById(@PathVariable Integer id) {
+        return filmService.getFilmById(id);
+    }
 }

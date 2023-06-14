@@ -28,4 +28,12 @@ public interface FilmService {
      */
     List<Film> getAllFilms();
 
+    /**
+     * Получение фильма по идентификатору
+     *
+     * @param id Идентификатор фильма
+     * @return Фильм
+     */
+    Film getFilmById(Integer id);
+
 }
