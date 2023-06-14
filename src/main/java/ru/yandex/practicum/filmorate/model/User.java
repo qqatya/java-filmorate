@@ -19,5 +19,5 @@ public class User {
     private String name;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate birthday;
-    private Set<Long> friends;
+    private Set<Integer> friends;
 }

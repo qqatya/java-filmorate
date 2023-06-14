@@ -22,5 +22,5 @@ public class Film {
      * Продолжительность фильма в минутах
      */
     private Long duration;
-    private Set<Long> usersLiked;
+    private Set<Integer> usersLiked;
 }

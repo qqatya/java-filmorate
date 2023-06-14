@@ -35,4 +35,39 @@ public interface UserRepository {
      * @return Пользователь (пустой, если такого пользователя нет)
      */
     Optional<User> getUserById(Integer id);
+
+    /**
+     * Добавление в друзья
+     *
+     * @param userId   Идентификатор пользователя
+     * @param friendId Идентификатор добавляемого друга
+     * @return Пользователь с обновленным списком друзей
+     */
+    User addFriend(Integer userId, Integer friendId);
+
+    /**
+     * Удаление из друзей
+     *
+     * @param userId   Идентификатор пользователя
+     * @param friendId Идентификатор удаляемого друга
+     * @return Пользователь с обновленным списком друзей
+     */
+    User deleteFriend(Integer userId, Integer friendId);
+
+    /**
+     * Получение списка друзей пользователя
+     *
+     * @param id Идентификатор пользователя
+     * @return Список друзей
+     */
+    List<User> getAllFriends(Integer id);
+
+    /**
+     * Получение списка общих друзей двух пользователей
+     *
+     * @param userId  Идентификатор пользователя
+     * @param otherId Идентификатор пользователя
+     * @return Список общих друзей
+     */
+    List<User> getCommonFriends(Integer userId, Integer otherId);
 }
