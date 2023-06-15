@@ -63,4 +63,12 @@ public interface FilmRepository {
      */
     List<Film> getPopularFilms(Integer count);
 
+    /**
+     * Проверка на существование фильма
+     *
+     * @param id Идентификатор фильма
+     * @return Признак существования
+     */
+    boolean doesExist(Integer id);
+
 }

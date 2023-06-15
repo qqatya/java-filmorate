@@ -11,10 +11,7 @@ import ru.yandex.practicum.filmorate.repository.UserRepository;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.validation.FilmValidator;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -27,20 +24,14 @@ public class FilmServiceImpl implements FilmService {
     @Override
     public Film createFilm(Film film) {
         filmValidator.validate(film);
-        if (film.getUsersLiked() == null) {
-            film.setUsersLiked(new HashSet<>());
-        }
         return filmRepository.insertFilm(film);
     }
 
     @Override
     public Film updateFilm(Film film) {
         filmValidator.validate(film);
-        if (film.getUsersLiked() == null) {
-            film.setUsersLiked(new HashSet<>());
-        }
-        if (filmRepository.getAllFilms().stream().anyMatch(current -> Objects.equals(current.getId(), film.getId()))) {
-            log.info("Updating film with id = {}", film.getId());
+        if (filmRepository.doesExist(film.getId())) {
+            log.info("Updating filmId = {}", film.getId());
             return filmRepository.updateFilm(film);
         }
         throw new FilmNotFoundException(String.valueOf(film.getId()));
@@ -54,20 +45,17 @@ public class FilmServiceImpl implements FilmService {
 
     @Override
     public Film getFilmById(Integer id) {
-        Optional<Film> userOptional = filmRepository.getFilmById(id);
-
-        if (userOptional.isEmpty()) {
-            throw new FilmNotFoundException(String.valueOf(id));
-        }
-        return userOptional.get();
+        log.info("Getting filmId = {}", id);
+        return filmRepository.getFilmById(id)
+                .orElseThrow(() -> new FilmNotFoundException(String.valueOf(id)));
     }
 
     @Override
     public Film putLike(Integer id, Integer userId) {
-        if (filmRepository.getFilmById(id).isEmpty()) {
+        if (!filmRepository.doesExist(id)) {
             throw new FilmNotFoundException(String.valueOf(id));
         }
-        if (userRepository.getUserById(userId).isEmpty()) {
+        if (!userRepository.doesExist(userId)) {
             throw new UserNotFoundException(String.valueOf(userId));
         }
         log.info("Adding like from userId = {} to filmId = {}", userId, id);
@@ -76,10 +64,10 @@ public class FilmServiceImpl implements FilmService {
 
     @Override
     public Film deleteLike(Integer id, Integer userId) {
-        if (filmRepository.getFilmById(id).isEmpty()) {
+        if (!filmRepository.doesExist(id)) {
             throw new FilmNotFoundException(String.valueOf(id));
         }
-        if (userRepository.getUserById(userId).isEmpty()) {
+        if (!userRepository.doesExist(userId)) {
             throw new UserNotFoundException(String.valueOf(userId));
         }
         log.info("Removing like from userId = {} to filmId = {}", userId, id);

@@ -24,7 +24,9 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public User updateUser(User user) {
-        users.put(user.getId(), user);
+        if (users.get(user.getId()) != null) {
+            users.put(user.getId(), user);
+        }
         return users.get(user.getId());
     }
 
@@ -100,6 +102,11 @@ public class UserRepositoryImpl implements UserRepository {
         return users.values().stream()
                 .filter(user -> result.contains(user.getId()))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean doesExist(Integer id) {
+        return users.keySet().stream().anyMatch(userId -> Objects.equals(userId, id));
     }
 
 }

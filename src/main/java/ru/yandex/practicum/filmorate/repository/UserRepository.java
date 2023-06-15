@@ -16,6 +16,7 @@ public interface UserRepository {
 
     /**
      * Обновление пользователя
+     *
      * @param user Объект, содержащий данные для обновления
      * @return Обновленный пользователь
      */
@@ -70,4 +71,12 @@ public interface UserRepository {
      * @return Список общих друзей
      */
     List<User> getCommonFriends(Integer userId, Integer otherId);
+
+    /**
+     * Проверка на существование пользователя
+     *
+     * @param id Идентификатор пользователя
+     * @return Признак существования
+     */
+    boolean doesExist(Integer id);
 }

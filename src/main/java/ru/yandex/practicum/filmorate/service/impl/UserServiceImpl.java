@@ -10,9 +10,7 @@ import ru.yandex.practicum.filmorate.repository.UserRepository;
 import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.validation.UserValidator;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -25,20 +23,14 @@ public class UserServiceImpl implements UserService {
     @Override
     public User createUser(User user) {
         userValidator.validate(user);
-        if (user.getFriends() == null) {
-            user.setFriends(new HashSet<>());
-        }
         return userRepository.insertUser(user);
     }
 
     @Override
     public User updateUser(User user) {
         userValidator.validate(user);
-        if (user.getFriends() == null) {
-            user.setFriends(new HashSet<>());
-        }
-        if (userRepository.getAllUsers().stream().anyMatch(current -> Objects.equals(current.getId(), user.getId()))) {
-            log.info("Updating user with id = {}", user.getId());
+        if (userRepository.doesExist(user.getId())) {
+            log.info("Updating userId = {}", user.getId());
             return userRepository.updateUser(user);
         }
         throw new UserNotFoundException(String.valueOf(user.getId()));
@@ -52,21 +44,17 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUserById(Integer id) {
-        Optional<User> userOptional = userRepository.getUserById(id);
-
-        log.info("Getting user by id = {}", id);
-        if (userOptional.isEmpty()) {
-            throw new UserNotFoundException(String.valueOf(id));
-        }
-        return userOptional.get();
+        log.info("Getting userId = {}", id);
+        return userRepository.getUserById(id)
+                .orElseThrow(() -> new UserNotFoundException(String.valueOf(id)));
     }
 
     @Override
     public User addFriend(Integer userId, Integer friendId) {
-        if (userRepository.getUserById(userId).isEmpty()) {
+        if (!userRepository.doesExist(userId)) {
             throw new UserNotFoundException(String.valueOf(userId));
         }
-        if (userRepository.getUserById(friendId).isEmpty()) {
+        if (!userRepository.doesExist(friendId)) {
             throw new UserNotFoundException(String.valueOf(friendId));
         }
         log.info("Adding userId = {} to friends of userId = {}", friendId, userId);
@@ -80,7 +68,7 @@ public class UserServiceImpl implements UserService {
         if (userOptional.isEmpty()) {
             throw new UserNotFoundException(String.valueOf(userId));
         }
-        if (userRepository.getUserById(friendId).isEmpty()) {
+        if (!userRepository.doesExist(friendId)) {
             throw new UserNotFoundException(String.valueOf(friendId));
         }
         if (userOptional.get().getFriends().contains(friendId)) {
@@ -94,7 +82,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<User> getAllFriends(Integer id) {
-        if (userRepository.getUserById(id).isEmpty()) {
+        if (!userRepository.doesExist(id)) {
             throw new UserNotFoundException(String.valueOf(id));
         }
         log.info("Getting all friends of userId = {}", id);
@@ -103,10 +91,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<User> getCommonFriends(Integer userId, Integer otherId) {
-        if (userRepository.getUserById(userId).isEmpty()) {
+        if (!userRepository.doesExist(userId)) {
             throw new UserNotFoundException(String.valueOf(userId));
         }
-        if (userRepository.getUserById(otherId).isEmpty()) {
+        if (!userRepository.doesExist(otherId)) {
             throw new UserNotFoundException(String.valueOf(otherId));
         }
         log.info("Getting common friends of userId = {} and userId = {}", userId, otherId);

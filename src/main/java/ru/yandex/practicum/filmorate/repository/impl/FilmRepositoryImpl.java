@@ -24,7 +24,9 @@ public class FilmRepositoryImpl implements FilmRepository {
 
     @Override
     public Film updateFilm(Film film) {
-        films.put(film.getId(), film);
+        if (films.get(film.getId()) != null) {
+            films.put(film.getId(), film);
+        }
         return films.get(film.getId());
     }
 
@@ -70,5 +72,10 @@ public class FilmRepositoryImpl implements FilmRepository {
                 .sorted((film1, film2) -> film2.getUsersLiked().size() - film1.getUsersLiked().size())
                 .limit(count)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean doesExist(Integer id) {
+        return films.keySet().stream().anyMatch(filmId -> Objects.equals(filmId, id));
     }
 }
