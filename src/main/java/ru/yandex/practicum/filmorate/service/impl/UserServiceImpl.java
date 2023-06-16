@@ -4,13 +4,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.repository.UserRepository;
 import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.validation.UserValidator;
 
 import java.util.List;
-import java.util.Objects;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -28,8 +29,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public User updateUser(User user) {
         userValidator.validate(user);
-        if (userRepository.getAllUsers().stream().anyMatch(current -> Objects.equals(current.getId(), user.getId()))) {
-            log.info("Updating user with id = {}", user.getId());
+        if (userRepository.doesExist(user.getId())) {
+            log.info("Updating userId = {}", user.getId());
             return userRepository.updateUser(user);
         }
         throw new UserNotFoundException(String.valueOf(user.getId()));
@@ -39,5 +40,64 @@ public class UserServiceImpl implements UserService {
     public List<User> getAllUsers() {
         log.info("Returning all users");
         return userRepository.getAllUsers();
+    }
+
+    @Override
+    public User getUserById(Integer id) {
+        log.info("Getting userId = {}", id);
+        return userRepository.getUserById(id)
+                .orElseThrow(() -> new UserNotFoundException(String.valueOf(id)));
+    }
+
+    @Override
+    public User addFriend(Integer userId, Integer friendId) {
+        if (!userRepository.doesExist(userId)) {
+            throw new UserNotFoundException(String.valueOf(userId));
+        }
+        if (!userRepository.doesExist(friendId)) {
+            throw new UserNotFoundException(String.valueOf(friendId));
+        }
+        log.info("Adding userId = {} to friends of userId = {}", friendId, userId);
+        return userRepository.addFriend(userId, friendId);
+    }
+
+    @Override
+    public User deleteFriend(Integer userId, Integer friendId) {
+        Optional<User> userOptional = userRepository.getUserById(userId);
+
+        if (userOptional.isEmpty()) {
+            throw new UserNotFoundException(String.valueOf(userId));
+        }
+        if (!userRepository.doesExist(friendId)) {
+            throw new UserNotFoundException(String.valueOf(friendId));
+        }
+        if (userOptional.get().getFriends().contains(friendId)) {
+            log.info("Deleting userId = {} from friends of userId = {}", friendId, userId);
+            return userRepository.deleteFriend(userId, friendId);
+        }
+
+        throw new ValidationException(
+                String.format("Пользователь с id = %d не состоит в друзьях у пользователя с id = %d", friendId, userId));
+    }
+
+    @Override
+    public List<User> getAllFriends(Integer id) {
+        if (!userRepository.doesExist(id)) {
+            throw new UserNotFoundException(String.valueOf(id));
+        }
+        log.info("Getting all friends of userId = {}", id);
+        return userRepository.getAllFriends(id);
+    }
+
+    @Override
+    public List<User> getCommonFriends(Integer userId, Integer otherId) {
+        if (!userRepository.doesExist(userId)) {
+            throw new UserNotFoundException(String.valueOf(userId));
+        }
+        if (!userRepository.doesExist(otherId)) {
+            throw new UserNotFoundException(String.valueOf(otherId));
+        }
+        log.info("Getting common friends of userId = {} and userId = {}", userId, otherId);
+        return userRepository.getCommonFriends(userId, otherId);
     }
 }

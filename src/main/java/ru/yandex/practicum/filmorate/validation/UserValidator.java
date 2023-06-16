@@ -28,6 +28,6 @@ public class UserValidator {
         if (user.getBirthday().isAfter(LocalDate.now())) {
             throw new ValidationException("Дата рождения не может быть в будущем времени");
         }
-        log.debug("User with id = {} is valid", user.getId());
+        log.debug("User is valid");
     }
 }

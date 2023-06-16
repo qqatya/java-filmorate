@@ -4,19 +4,21 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.repository.FilmRepository;
+import ru.yandex.practicum.filmorate.repository.UserRepository;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.validation.FilmValidator;
 
 import java.util.List;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class FilmServiceImpl implements FilmService {
     private final FilmRepository filmRepository;
+    private final UserRepository userRepository;
     private final FilmValidator filmValidator;
 
     @Override
@@ -28,8 +30,8 @@ public class FilmServiceImpl implements FilmService {
     @Override
     public Film updateFilm(Film film) {
         filmValidator.validate(film);
-        if (filmRepository.getAllFilms().stream().anyMatch(current -> Objects.equals(current.getId(), film.getId()))) {
-            log.info("Updating film with id = {}", film.getId());
+        if (filmRepository.doesExist(film.getId())) {
+            log.info("Updating filmId = {}", film.getId());
             return filmRepository.updateFilm(film);
         }
         throw new FilmNotFoundException(String.valueOf(film.getId()));
@@ -39,5 +41,42 @@ public class FilmServiceImpl implements FilmService {
     public List<Film> getAllFilms() {
         log.info("Returning all films");
         return filmRepository.getAllFilms();
+    }
+
+    @Override
+    public Film getFilmById(Integer id) {
+        log.info("Getting filmId = {}", id);
+        return filmRepository.getFilmById(id)
+                .orElseThrow(() -> new FilmNotFoundException(String.valueOf(id)));
+    }
+
+    @Override
+    public Film putLike(Integer id, Integer userId) {
+        if (!filmRepository.doesExist(id)) {
+            throw new FilmNotFoundException(String.valueOf(id));
+        }
+        if (!userRepository.doesExist(userId)) {
+            throw new UserNotFoundException(String.valueOf(userId));
+        }
+        log.info("Adding like from userId = {} to filmId = {}", userId, id);
+        return filmRepository.putLike(id, userId);
+    }
+
+    @Override
+    public Film deleteLike(Integer id, Integer userId) {
+        if (!filmRepository.doesExist(id)) {
+            throw new FilmNotFoundException(String.valueOf(id));
+        }
+        if (!userRepository.doesExist(userId)) {
+            throw new UserNotFoundException(String.valueOf(userId));
+        }
+        log.info("Removing like from userId = {} to filmId = {}", userId, id);
+        return filmRepository.deleteLike(id, userId);
+    }
+
+    @Override
+    public List<Film> getPopularFilms(Integer count) {
+        log.info("Getting popular films amount = {}", count);
+        return filmRepository.getPopularFilms(count);
     }
 }

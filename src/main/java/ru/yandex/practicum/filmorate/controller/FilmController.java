@@ -45,4 +45,52 @@ public class FilmController {
     public List<Film> getAllFilms() {
         return filmService.getAllFilms();
     }
+
+    /**
+     * Получение фильма по идентификатору
+     *
+     * @param id Идентификатор фильма
+     * @return Фильм
+     */
+    @GetMapping("/{id}")
+    public Film getFilmById(@PathVariable Integer id) {
+        return filmService.getFilmById(id);
+    }
+
+    /**
+     * Добавление лайка пользователя
+     *
+     * @param id     Идентификатор фильма
+     * @param userId Идентификатор пользователя
+     * @return Фильм с обновленным списком лайков
+     */
+    @PutMapping("{id}/like/{userId}")
+    public Film putLike(@PathVariable Integer id,
+                        @PathVariable Integer userId) {
+        return filmService.putLike(id, userId);
+    }
+
+    /**
+     * Удаление лайка пользователя
+     *
+     * @param id     Идентификатор фильма
+     * @param userId Идентификатор пользователя
+     * @return Фильм с обновленным списком лайков
+     */
+    @DeleteMapping("/{id}/like/{userId}")
+    public Film deleteLike(@PathVariable Integer id,
+                           @PathVariable Integer userId) {
+        return filmService.deleteLike(id, userId);
+    }
+
+    /**
+     * Получение фильмов по маскимальному количеству лайков
+     *
+     * @param count Количество фильмов
+     * @return Список фильмов
+     */
+    @GetMapping("/popular")
+    public List<Film> getPopularFilms(@RequestParam(defaultValue = "10") Integer count) {
+        return filmService.getPopularFilms(count);
+    }
 }

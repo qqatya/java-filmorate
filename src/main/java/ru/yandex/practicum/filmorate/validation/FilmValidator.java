@@ -28,6 +28,6 @@ public class FilmValidator {
         if (film.getDuration() < 0) {
             throw new ValidationException("Продолжительность фильма не может быть отрицательной");
         }
-        log.debug("Film with id = {} is valid", film.getId());
+        log.debug("Film is valid");
     }
 }

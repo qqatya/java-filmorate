@@ -28,4 +28,37 @@ public interface FilmService {
      */
     List<Film> getAllFilms();
 
+    /**
+     * Получение фильма по идентификатору
+     *
+     * @param id Идентификатор фильма
+     * @return Фильм
+     */
+    Film getFilmById(Integer id);
+
+    /**
+     * Добавление лайка пользователя
+     *
+     * @param id     Идентификатор фильма
+     * @param userId Идентификатор пользователя
+     * @return Фильм с обновленным списком лайков
+     */
+    Film putLike(Integer id, Integer userId);
+
+    /**
+     * Удаление лайка пользователя
+     *
+     * @param id     Идентификатор фильма
+     * @param userId Идентификатор пользователя
+     * @return Фильм с обновленным списком лайков
+     */
+    Film deleteLike(Integer id, Integer userId);
+
+    /**
+     * Получение фильмов по маскимальному количеству лайков
+     *
+     * @param count Количество фильмов
+     * @return Список фильмов
+     */
+    List<Film> getPopularFilms(Integer count);
 }

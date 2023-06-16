@@ -46,4 +46,63 @@ public class UserController {
         return userService.getAllUsers();
     }
 
+    /**
+     * Получение пользователя по идентификатору
+     *
+     * @param id Идентификатор пользователя
+     * @return Пользователь
+     */
+    @GetMapping("/{id}")
+    public User getUserById(@PathVariable Integer id) {
+        return userService.getUserById(id);
+    }
+
+    /**
+     * Добавление в друзья
+     *
+     * @param userId   Идентификатор пользователя
+     * @param friendId Идентификатор добавляемого друга
+     * @return Пользователь с обновленным списком друзей
+     */
+    @PutMapping("/{id}/friends/{friendId}")
+    public User addFriend(@PathVariable("id") Integer userId,
+                          @PathVariable Integer friendId) {
+        return userService.addFriend(userId, friendId);
+    }
+
+    /**
+     * Удаление из друзей
+     *
+     * @param userId   Идентификатор пользователя
+     * @param friendId Идентификатор удаляемого друга
+     * @return Пользователь с обновленным списком друзей
+     */
+    @DeleteMapping("/{id}/friends/{friendId}")
+    public User deleteFriend(@PathVariable("id") Integer userId,
+                             @PathVariable Integer friendId) {
+        return userService.deleteFriend(userId, friendId);
+    }
+
+    /**
+     * Получение списка друзей пользователя
+     *
+     * @param id Идентификатор пользователя
+     * @return Список друзей
+     */
+    @GetMapping("{id}/friends")
+    public List<User> getAllFriends(@PathVariable Integer id) {
+        return userService.getAllFriends(id);
+    }
+
+    /**
+     * Получение списка общих друзей двух пользователей
+     * @param userId Идентификатор пользователя
+     * @param otherId Идентификатор пользователя
+     * @return Список общих друзей
+     */
+    @GetMapping("{id}/friends/common/{otherId}")
+    public List<User> getCommonFriends(@PathVariable("id") Integer userId,
+                                       @PathVariable Integer otherId) {
+        return userService.getCommonFriends(userId, otherId);
+    }
 }
