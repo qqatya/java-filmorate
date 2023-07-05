@@ -1,7 +1,7 @@
 # java-filmorate
 ER diagram:
 
-![](/Users/buurgr/Downloads/filmorate_er.png)
+![](db/filmorate_er.png)
 
 Query examples:
 
