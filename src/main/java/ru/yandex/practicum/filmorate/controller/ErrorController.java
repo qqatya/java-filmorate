@@ -7,10 +7,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
-import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
-import ru.yandex.practicum.filmorate.exception.RatingNotFoundException;
-import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.exception.*;
 import ru.yandex.practicum.filmorate.model.ErrorInfo;
 
 @Slf4j
@@ -69,6 +66,20 @@ public class ErrorController extends ResponseEntityExceptionHandler {
     @ResponseBody
     public ErrorInfo processRatingNotFoundException(RatingNotFoundException e) {
         log.debug("Can not find rating: {}", e.getMessage());
+        return new ErrorInfo(e.getMessage());
+    }
+
+    /**
+     * Обработчик GenreNotFoundException
+     *
+     * @param e Эксепшн
+     * @return Объект, содержащий сообщение об ошибке
+     */
+    @ExceptionHandler(GenreNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ResponseBody
+    public ErrorInfo processGenreNotFoundException(GenreNotFoundException e) {
+        log.debug("Can not find genre: {}", e.getMessage());
         return new ErrorInfo(e.getMessage());
     }
 

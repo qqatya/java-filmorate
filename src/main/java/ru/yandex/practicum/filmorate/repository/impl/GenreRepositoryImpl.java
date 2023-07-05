@@ -10,6 +10,7 @@ import ru.yandex.practicum.filmorate.repository.GenreRepository;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -33,6 +34,10 @@ public class GenreRepositoryImpl implements GenreRepository {
 
     private static final String SQL_DELETE_FILM_GENRE_BY_ID = "DELETE FROM public.film_genre WHERE film_id = :id "
             + "AND genre_id = :genre_id";
+
+    private static final String SQL_GET_ALL_GENRES = "SELECT id, name FROM public.genre";
+
+    private static final String SQL_GET_GENRE_BY_ID = "SELECT id, name FROM public.genre WHERE id = :id";
 
     @Override
     public Set<Genre> getByFilmId(Integer id) {
@@ -90,6 +95,19 @@ public class GenreRepositoryImpl implements GenreRepository {
 
         params.addValue("id", filmId);
         jdbcTemplate.update(SQL_DELETE_FILM_GENRES, params);
+    }
+
+    @Override
+    public List<Genre> getAllGenres() {
+        return jdbcTemplate.query(SQL_GET_ALL_GENRES, genreMapper);
+    }
+
+    @Override
+    public Optional<Genre> getGenreById(Integer id) {
+        var params = new MapSqlParameterSource();
+
+        params.addValue("id", id);
+        return jdbcTemplate.query(SQL_GET_GENRE_BY_ID, params, genreMapper).stream().findFirst();
     }
 
 }

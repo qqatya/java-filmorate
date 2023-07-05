@@ -27,6 +27,7 @@ public class RatingServiceImpl implements RatingService {
 
     @Override
     public Rating getRatingById(Integer id) {
+        log.info("Getting rating by id = {}", id);
         return ratingRepository.getRatingById(id)
                 .orElseThrow(() -> new RatingNotFoundException(String.valueOf(id)));
     }
