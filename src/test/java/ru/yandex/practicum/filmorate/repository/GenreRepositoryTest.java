@@ -53,7 +53,15 @@ class GenreRepositoryTest {
     @Test
     @Order(2)
     void getByFilmId() {
-        Set<Genre> genres = genreRepository.getByFilmId(1);
+        Film film = filmRepository.insertFilm(Film.builder()
+                .name("The Butterfly Effect")
+                .description("The Butterfly Effect is a 2004 American science fiction thriller")
+                .releaseDate(LocalDate.of(2004, 1, 23))
+                .duration(113L)
+                .genres(Set.of(Genre.builder().id(2).name("Драма").build(),
+                        Genre.builder().id(4).name("Триллер").build()))
+                .build());
+        Set<Genre> genres = genreRepository.getByFilmId(film.getId());
 
         assertEquals(2, genres.size());
         assertTrue(genres.stream().anyMatch(genre -> genre.getId() == 4));
