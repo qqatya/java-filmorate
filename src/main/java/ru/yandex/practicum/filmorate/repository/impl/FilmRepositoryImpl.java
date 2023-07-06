@@ -162,7 +162,11 @@ public class FilmRepositoryImpl implements FilmRepository {
         params.addValue("description", film.getDescription());
         params.addValue("release_date", film.getReleaseDate());
         params.addValue("duration", film.getDuration());
-        params.addValue("rating_id", film.getMpa().getId());
+        if (film.getMpa() != null) {
+            params.addValue("rating_id", film.getMpa().getId());
+        } else {
+            params.addValue("rating_id", null);
+        }
         return params;
     }
 
