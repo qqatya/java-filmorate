@@ -12,17 +12,23 @@ import java.util.Set;
 @Data
 @Builder
 public class User {
+
     private Integer id;
+
     @NonNull
     private String email;
+
     @NonNull
     private String login;
+
     private String name;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate birthday;
-    private Set<Integer> friends;
 
-    public User(Integer id, String email, String login, String name, LocalDate birthday, Set<Integer> friends) {
+    private Set<Friend> friends;
+
+    public User(Integer id, String email, String login, String name, LocalDate birthday, Set<Friend> friends) {
         this.id = id;
         this.email = email;
         this.login = login;
