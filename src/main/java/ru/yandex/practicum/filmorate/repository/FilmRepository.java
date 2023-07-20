@@ -33,7 +33,7 @@ public interface FilmRepository {
      * Получение фильма по идентификатору
      *
      * @param id Идентификатор фильма
-     * @return Фильма (пустой, если такого фильма нет)
+     * @return Фильм (пустой, если такого фильма нет)
      */
     Optional<Film> getFilmById(Integer id);
 
