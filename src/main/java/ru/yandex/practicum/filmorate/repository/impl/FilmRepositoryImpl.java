@@ -55,6 +55,8 @@ public class FilmRepositoryImpl implements FilmRepository {
     private static final String SQL_DELETE_LIKE = "DELETE FROM public.film_like "
             + "WHERE film_id = :film_id AND liked_person_id = :person_id";
 
+    private static final String SQL_DELETE_FILM_BY_ID = "DELETE FROM public.film WHERE id = :id";
+
     @Override
     public Film insertFilm(Film film) {
         log.info("Creating film with id = {}", film.getId());
@@ -153,6 +155,14 @@ public class FilmRepositoryImpl implements FilmRepository {
     @Override
     public boolean doesExist(Integer id) {
         return getAllFilms().stream().anyMatch(film -> Objects.equals(film.getId(), id));
+    }
+
+    @Override
+    public void deleteFilmById(Integer id) {
+        var params = new MapSqlParameterSource();
+
+        params.addValue("id", id);
+        jdbcTemplate.update(SQL_DELETE_FILM_BY_ID, params);
     }
 
     private MapSqlParameterSource getParams(Film film) {

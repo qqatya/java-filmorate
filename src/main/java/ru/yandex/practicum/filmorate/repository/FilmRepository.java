@@ -71,4 +71,11 @@ public interface FilmRepository {
      */
     boolean doesExist(Integer id);
 
+    /**
+     * Удаление фильма по идентификатору
+     *
+     * @param id Идентификатор фильма
+     */
+    void deleteFilmById(Integer id);
+
 }

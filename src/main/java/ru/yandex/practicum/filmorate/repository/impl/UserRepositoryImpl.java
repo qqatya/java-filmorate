@@ -56,6 +56,8 @@ public class UserRepositoryImpl implements UserRepository {
             + "WHERE (person_id = :person_id AND friend_id = :friend_id) "
             + "OR (person_id = :friend_id AND friend_id = :person_id and is_confirmed = true)";
 
+    private static final String SQL_DELETE_USER_BY_ID = "DELETE FROM public.person WHERE id = :id";
+
     @Override
     public User insertUser(User user) {
         log.info("Creating user with id = {}", user.getId());
@@ -175,6 +177,14 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public boolean doesExist(Integer id) {
         return getAllUsers().stream().anyMatch(user -> Objects.equals(user.getId(), id));
+    }
+
+    @Override
+    public void deleteUserById(Integer id) {
+        var params = new MapSqlParameterSource();
+
+        params.addValue("id", id);
+        jdbcTemplate.update(SQL_DELETE_USER_BY_ID, params);
     }
 
     private Set<Friend> getFriendIdsByUserId(Integer id) {
