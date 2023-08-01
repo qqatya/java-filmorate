@@ -79,4 +79,12 @@ public class FilmServiceImpl implements FilmService {
         log.info("Getting popular films amount = {}", count);
         return filmRepository.getPopularFilms(count);
     }
+
+    @Override
+    public void deleteFilmById(Integer id) {
+        if (!filmRepository.doesExist(id)) {
+            throw new FilmNotFoundException(String.valueOf(id));
+        }
+        filmRepository.deleteFilmById(id);
+    }
 }

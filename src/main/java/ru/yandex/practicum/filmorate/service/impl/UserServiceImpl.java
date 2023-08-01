@@ -107,4 +107,12 @@ public class UserServiceImpl implements UserService {
         log.info("Getting common friends of userId = {} and userId = {}", userId, otherId);
         return userRepository.getCommonFriends(userId, otherId);
     }
+
+    @Override
+    public void deleteUserById(Integer id) {
+        if (!userRepository.doesExist(id)) {
+            throw new UserNotFoundException(String.valueOf(id));
+        }
+        userRepository.deleteUserById(id);
+    }
 }
