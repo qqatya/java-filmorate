@@ -10,8 +10,10 @@ import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.mapper.FriendMapper;
 import ru.yandex.practicum.filmorate.mapper.UserMapper;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Friend;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.repository.FilmRepository;
 import ru.yandex.practicum.filmorate.repository.UserRepository;
 
 import java.util.*;
@@ -27,6 +29,8 @@ public class UserRepositoryImpl implements UserRepository {
     private final UserMapper userMapper;
 
     private final FriendMapper friendMapper;
+
+    private final FilmRepository filmRepository;
 
     private static final String SQL_INSERT_USER = "INSERT INTO public.person "
             + "(email, login, name, birthday) VALUES(:email, :login, :name, :birthday)";
@@ -57,6 +61,15 @@ public class UserRepositoryImpl implements UserRepository {
             + "OR (person_id = :friend_id AND friend_id = :person_id and is_confirmed = true)";
 
     private static final String SQL_DELETE_USER_BY_ID = "DELETE FROM public.person WHERE id = :id";
+
+    private static final String SQL_GET_SIMILAR_USER = "SELECT l.liked_person_id FROM public.film_like AS l " +
+            "WHERE l.film_id IN " +
+            "(SELECT l2.film_id FROM public.film_like AS l2 WHERE l2.liked_person_id = :id) " +
+            "AND l.liked_person_id != :id";
+
+    private static final String SQL_GET_RECOMMENDATIONS = "SELECT l.film_id FROM public.film_like AS l " +
+            "WHERE l.liked_person_id = :other_id AND l.film_id NOT IN " +
+            "(SELECT l2.film_id FROM public.film_like AS l2 WHERE l2.liked_person_id = :id)";
 
     @Override
     public User insertUser(User user) {
@@ -185,6 +198,25 @@ public class UserRepositoryImpl implements UserRepository {
 
         params.addValue("id", id);
         jdbcTemplate.update(SQL_DELETE_USER_BY_ID, params);
+    }
+
+    @Override
+    public List<Film> getRecommendations(Integer id) {
+        var params = new MapSqlParameterSource();
+        params.addValue("id", id);
+        params.addValue("other_id", getSimilarUserId(id).orElse(null));
+        List<Integer> filmId = jdbcTemplate.queryForList(SQL_GET_RECOMMENDATIONS, params, Integer.class);
+        return filmId.stream()
+                .filter(i -> filmRepository.getFilmById(i).isPresent())
+                .map(i -> filmRepository.getFilmById(i).orElse(null)).collect(Collectors.toList());
+    }
+
+    private Optional<Integer> getSimilarUserId(Integer id) {
+        List<Integer> ids = jdbcTemplate.queryForList(SQL_GET_SIMILAR_USER, Map.of("id", id), Integer.class);
+        if (ids.size() != 1) {
+            return Optional.empty();
+        }
+        return Optional.of(ids.get(0));
     }
 
     private Set<Friend> getFriendIdsByUserId(Integer id) {
