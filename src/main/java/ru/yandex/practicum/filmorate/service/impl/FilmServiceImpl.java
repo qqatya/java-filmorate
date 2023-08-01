@@ -82,13 +82,12 @@ public class FilmServiceImpl implements FilmService {
 
     @Override
     public List<Film> getCommonFilms(Integer userId, Integer friendId) {
-        if (userRepository.getUserById(userId) == null) {
+        if (!userRepository.doesExist(userId)) {
             throw new UserNotFoundException(userId.toString());
         }
-        if (userRepository.getUserById(friendId) == null) {
+        if (!userRepository.doesExist(friendId)) {
             throw new UserNotFoundException(friendId.toString());
         }
-
         log.info("Getting common films userId = {} and friendId = {}", userId, friendId);
         return filmRepository.getCommonFilms(userId, friendId);
     }

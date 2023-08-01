@@ -55,18 +55,16 @@ public class FilmRepositoryImpl implements FilmRepository {
     private static final String SQL_DELETE_LIKE = "DELETE FROM public.film_like "
             + "WHERE film_id = :film_id AND liked_person_id = :person_id";
 
-    private static final String SQL_COMMON_FILMS = "SELECT * FROM film AS f " +
+    private static final String SQL_COMMON_FILMS = "SELECT * FROM public.film AS f " +
             "WHERE f.id IN (SELECT film_id " +
-            "FROM film_like " +
-            "WHERE film_id IN (SELECT film_id " +
-            "FROM film_like " +
+            "FROM public.film_like " +
             "WHERE liked_person_id = :userId " +
             "INTERSECT " +
             "SELECT film_id " +
-            "FROM film_like " +
+            "FROM public.film_like " +
             "WHERE liked_person_id = :friendId) " +
-            "GROUP BY film_id " +
-            "ORDER BY COUNT(film_id) DESC) ";
+            "GROUP BY f.id " +
+            "ORDER BY COUNT(f.id) DESC ";
 
     private static final String SQL_DELETE_FILM_BY_ID = "DELETE FROM public.film WHERE id = :id";
 
