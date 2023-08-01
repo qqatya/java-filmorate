@@ -32,10 +32,12 @@ public class Film {
 
     private Set<Genre> genres;
 
+    private Set<Director> directors;
+
     private Rating mpa;
 
     public Film(Integer id, String name, String description, LocalDate releaseDate, Long duration,
-                Set<Integer> usersLiked, Set<Genre> genres, Rating mpa) {
+                Set<Integer> usersLiked, Set<Genre> genres, Set<Director> directors, Rating mpa) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -43,6 +45,7 @@ public class Film {
         this.duration = duration;
         this.usersLiked = usersLiked == null ? new HashSet<>() : usersLiked;
         this.genres = genres == null ? new HashSet<>() : genres;
+        this.directors = directors == null ? new HashSet<>() : directors;
         this.mpa = mpa;
     }
 }

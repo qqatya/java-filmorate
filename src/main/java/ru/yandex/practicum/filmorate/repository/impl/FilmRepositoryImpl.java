@@ -11,6 +11,7 @@ import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.mapper.LikedPersonMapper;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.repository.DirectorRepository;
 import ru.yandex.practicum.filmorate.repository.FilmRepository;
 import ru.yandex.practicum.filmorate.repository.GenreRepository;
 import ru.yandex.practicum.filmorate.repository.RatingRepository;
@@ -23,39 +24,35 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class FilmRepositoryImpl implements FilmRepository {
 
-    private final NamedParameterJdbcTemplate jdbcTemplate;
-
-    private final GenreRepository genreRepository;
-
-    private final RatingRepository ratingRepository;
-
-    private final FilmMapper filmMapper;
-
-    private final LikedPersonMapper likedPersonMapper;
-
     private static final String SQL_INSERT_FILM = "INSERT INTO public.film "
             + "(name, description, release_date, duration, rating_id) VALUES(:name, :description, :release_date, "
             + ":duration, :rating_id)";
-
     private static final String SQL_UPDATE_FILM = "UPDATE public.film SET name = :name, description = :description, "
             + "release_date = :release_date, duration = :duration, rating_id = :rating_id where id = :id";
-
     private static final String SQL_GET_FILM_BY_ID = "SELECT id, name, description, release_date, duration, rating_id "
             + "FROM public.film WHERE id = :id";
-
     private static final String SQL_GET_ALL_FILMS = "SELECT id, name, description, release_date, duration, rating_id "
             + "FROM public.film";
-
     private static final String SQL_INSERT_LIKE = "INSERT INTO public.film_like (film_id, liked_person_id) "
             + "VALUES (:film_id, :person_id)";
-
     private static final String SQL_GET_LIKES_BY_FILM_ID = "SELECT liked_person_id FROM public.film_like "
             + "WHERE film_id = :film_id";
-
     private static final String SQL_DELETE_LIKE = "DELETE FROM public.film_like "
             + "WHERE film_id = :film_id AND liked_person_id = :person_id";
-
     private static final String SQL_DELETE_FILM_BY_ID = "DELETE FROM public.film WHERE id = :id";
+    private static final String SQL_GET_DIRECTORS_BY_FILM_ID = "SELECT director_id FROM public.film_director "
+            + "WHERE film_id = :film_id";
+    private static final String SQL_GET_FILMS_BY_DIRECTOR_ID = "SELECT film.id, film.name, film.description, " +
+            "film.release_date, film.duration, film.rating_id " +
+            "FROM public.film INNER JOIN public.film_director ON film_director.film_id = film.id " +
+            "WHERE film_director.director_id = :director_id";
+
+    private final NamedParameterJdbcTemplate jdbcTemplate;
+    private final GenreRepository genreRepository;
+    private final RatingRepository ratingRepository;
+    private final DirectorRepository directorRepository;
+    private final FilmMapper filmMapper;
+    private final LikedPersonMapper likedPersonMapper;
 
     @Override
     public Film insertFilm(Film film) {
@@ -67,6 +64,7 @@ public class FilmRepositoryImpl implements FilmRepository {
         Integer filmId = holder.getKey().intValue();
 
         genreRepository.insertFilmGenres(film.getGenres(), filmId);
+        directorRepository.insertFilmDirectors(film.getDirectors(), filmId);
         return getFilmById(filmId).orElseThrow(() -> new FilmNotFoundException(String.valueOf(filmId)));
     }
 
@@ -84,6 +82,11 @@ public class FilmRepositoryImpl implements FilmRepository {
             } else {
                 genreRepository.updateFilmGenres(film.getGenres(), film.getId());
             }
+            if (film.getDirectors().isEmpty()) {
+                directorRepository.deleteFilmDirectors(film.getId());
+            } else {
+                directorRepository.updateFilmDirectors(film.getDirectors(), film.getId());
+            }
         }
         Integer filmId = holder.getKey().intValue();
 
@@ -98,6 +101,7 @@ public class FilmRepositoryImpl implements FilmRepository {
             film.setUsersLiked(getUsersLikedByFilmId(film.getId()));
             film.setGenres(genreRepository.getByFilmId(film.getId()));
             film.setMpa(ratingRepository.getByFilmId(film.getId()).orElse(null));
+            film.setDirectors(directorRepository.getByFilmId(film.getId()));
         }).collect(Collectors.toList());
     }
 
@@ -113,6 +117,7 @@ public class FilmRepositoryImpl implements FilmRepository {
             film = filmOptional.get();
             film.setUsersLiked(getUsersLikedByFilmId(id));
             film.setGenres(genreRepository.getByFilmId(id));
+            film.setDirectors(directorRepository.getByFilmId(id));
             film.setMpa(ratingRepository.getByFilmId(id).orElse(null));
         }
         return Optional.ofNullable(film);
@@ -165,6 +170,7 @@ public class FilmRepositoryImpl implements FilmRepository {
         jdbcTemplate.update(SQL_DELETE_FILM_BY_ID, params);
     }
 
+
     private MapSqlParameterSource getParams(Film film) {
         var params = new MapSqlParameterSource();
 
@@ -194,4 +200,29 @@ public class FilmRepositoryImpl implements FilmRepository {
         params.addValue("film_id", id);
         return new HashSet<>(jdbcTemplate.query(SQL_GET_LIKES_BY_FILM_ID, params, likedPersonMapper));
     }
-}
+
+    public List<Film> getFilmsByDirectorId(Integer id, String sortBy) {
+        var params = new MapSqlParameterSource();
+        params.addValue("director_id", id);
+        List<Film> films = new ArrayList<>(jdbcTemplate.query(SQL_GET_FILMS_BY_DIRECTOR_ID, params, filmMapper));
+
+        if ("year".equals(sortBy)) {
+            return films.stream()
+                    .sorted((film1, film2) -> film2.getReleaseDate().compareTo(film1.getReleaseDate()))
+                    .peek(film -> {
+                        film.setUsersLiked(getUsersLikedByFilmId(film.getId()));
+                        film.setGenres(genreRepository.getByFilmId(film.getId()));
+                        film.setMpa(ratingRepository.getByFilmId(film.getId()).orElse(null));
+                        film.setDirectors(directorRepository.getByFilmId(film.getId()));
+                    }).collect(Collectors.toList());
+        } else {
+            return films.stream()
+                    .sorted((film1, film2) -> film2.getUsersLiked().size() - film1.getUsersLiked().size())
+                    .peek(film -> {
+                        film.setUsersLiked(getUsersLikedByFilmId(film.getId()));
+                        film.setGenres(genreRepository.getByFilmId(film.getId()));
+                        film.setMpa(ratingRepository.getByFilmId(film.getId()).orElse(null));
+                        film.setDirectors(directorRepository.getByFilmId(film.getId()));
+                    }).collect(Collectors.toList());
+        }
+    }}

@@ -103,4 +103,14 @@ public class FilmController {
     public void deleteFilmById(@PathVariable Integer id) {
         filmService.deleteFilmById(id);
     }
+
+    /**
+     * Получение всех фильмов режиссера, отсортированных по количеству лайков или году выпуска
+     *
+     * @return Список фильмов режиссера
+     */
+    @GetMapping("/director/{directorId}")
+    public List<Film> getDirectorsSortedBy(@PathVariable int directorId, @RequestParam(defaultValue = "likes") String sortBy) {
+        return filmService.getFilmsByDirectorSortedBy(directorId, sortBy);
+    }
 }

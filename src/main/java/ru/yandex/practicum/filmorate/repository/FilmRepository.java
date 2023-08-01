@@ -7,7 +7,7 @@ import java.util.Optional;
 
 public interface FilmRepository {
     /**
-     * Создание/обновление фильма
+     * Создание фильма
      *
      * @param film Объект, содержащий данные для создания
      * @return Созданный фильм
@@ -78,4 +78,5 @@ public interface FilmRepository {
      */
     void deleteFilmById(Integer id);
 
+    List<Film>  getFilmsByDirectorId(Integer directorId, String sortBy);
 }

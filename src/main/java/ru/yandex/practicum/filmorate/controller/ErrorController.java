@@ -84,6 +84,20 @@ public class ErrorController extends ResponseEntityExceptionHandler {
     }
 
     /**
+     * Обработчик DirectorNotFoundException
+     *
+     * @param e Эксепшн
+     * @return Объект, содержащий сообщение об ошибке
+     */
+    @ExceptionHandler(DirectorNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ResponseBody
+    public ErrorInfo processDirectorNotFoundException(DirectorNotFoundException e) {
+        log.debug("Can not find director: {}", e.getMessage());
+        return new ErrorInfo(e.getMessage());
+    }
+
+    /**
      * Обработчик непредвиденных ошибок
      *
      * @param e Эксепшн

@@ -68,4 +68,11 @@ public interface FilmService {
      * @param id Идентификатор фильма
      */
     void deleteFilmById(Integer id);
+
+    /**
+     * Получение всех фильмов режиссера, отсортированных по количеству лайков или году выпуска
+     *
+     * @return Список фильмов
+     */
+     List<Film> getFilmsByDirectorSortedBy(Integer directorId, String sortBy);
 }
