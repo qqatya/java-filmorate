@@ -71,4 +71,13 @@ public interface FilmRepository {
      */
     boolean doesExist(Integer id);
 
+    /**
+     * Вывод общих с другом фильмов с сортировкой по их популярности
+     *
+     * @param userId   Идентификатор пользователя, запрашивающего информацию
+     * @param friendId Идентификатор пользователя, с которым необходимо сравнить список фильмов.
+     * @return Список фильмов, отсортированных по популярности
+     */
+    List<Film> getCommonFilms(Integer userId, Integer friendId);
+
 }

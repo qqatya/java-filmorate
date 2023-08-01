@@ -18,5 +18,6 @@ public class FilmMapper implements RowMapper<Film> {
                 .releaseDate(rs.getDate("release_date").toLocalDate())
                 .duration(rs.getLong("duration"))
                 .build();
+
     }
 }

@@ -93,4 +93,16 @@ public class FilmController {
     public List<Film> getPopularFilms(@RequestParam(defaultValue = "10") Integer count) {
         return filmService.getPopularFilms(count);
     }
+
+    /**
+     * Вывод общих с другом фильмов с сортировкой по их популярности
+     *
+     * @param userId   Идентификатор пользователя, запрашивающего информацию
+     * @param friendId Идентификатор пользователя, с которым необходимо сравнить список фильмов.
+     * @return Список фильмов, отсортированных по популярности
+     */
+    @GetMapping("/common")
+    public List<Film> getCommonFilms(@RequestParam Integer userId,@RequestParam Integer friendId) {
+        return filmService.getCommonFilms(userId,friendId);
+    }
 }
