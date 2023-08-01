@@ -7,6 +7,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.mapper.FriendMapper;
 import ru.yandex.practicum.filmorate.mapper.UserMapper;
@@ -214,7 +215,8 @@ public class UserRepositoryImpl implements UserRepository {
         List<Integer> filmId = jdbcTemplate.queryForList(SQL_GET_RECOMMENDATIONS, params, Integer.class);
         return filmId.stream()
                 .filter(i -> filmRepository.getFilmById(i).isPresent())
-                .map(i -> filmRepository.getFilmById(i).orElse(null)).collect(Collectors.toList());
+                .map(i -> filmRepository.getFilmById(i).orElseThrow(()-> new FilmNotFoundException(String.valueOf(i))))
+                .collect(Collectors.toList());
     }
 
     private Optional<Integer> getSimilarUserId(Integer id) {
