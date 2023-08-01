@@ -215,7 +215,7 @@ public class UserRepositoryImpl implements UserRepository {
         List<Integer> filmId = jdbcTemplate.queryForList(SQL_GET_RECOMMENDATIONS, params, Integer.class);
         return filmId.stream()
                 .filter(i -> filmRepository.getFilmById(i).isPresent())
-                .map(i -> filmRepository.getFilmById(i).orElseThrow(()-> new FilmNotFoundException(String.valueOf(i))))
+                .map(i -> filmRepository.getFilmById(i).orElseThrow(() -> new FilmNotFoundException(String.valueOf(i))))
                 .collect(Collectors.toList());
     }
 
