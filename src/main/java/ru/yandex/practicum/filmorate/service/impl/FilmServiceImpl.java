@@ -85,6 +85,7 @@ public class FilmServiceImpl implements FilmService {
         if (!filmRepository.doesExist(id)) {
             throw new FilmNotFoundException(String.valueOf(id));
         }
+        log.info("Deleting filmId = {}", id);
         filmRepository.deleteFilmById(id);
     }
 }

@@ -59,12 +59,68 @@ public class ReviewController {
     }
 
     /**
-     * Получение всех отзывов
+     * Получение отзывов
      *
+     * @param filmId Идентификатор фильма
+     * @param count  Количество отзывов
      * @return Список отзывов
      */
     @GetMapping
-    public List<Review> getAllFilms() {
-        return reviewService.getAllReviews();
+    public List<Review> getAllReviews(@RequestParam(required = false) Integer filmId,
+                                      @RequestParam(defaultValue = "10") Integer count) {
+        if (filmId == null) {
+            return reviewService.getAllReviews();
+        } else {
+            return reviewService.getReviewsByFilmId(filmId, count);
+        }
+
+    }
+
+    /**
+     * Добавление лайка отзыву
+     *
+     * @param id     Идентификатор отзыва
+     * @param userId Идентификатор пользователя
+     * @return Отзыв
+     */
+    @PutMapping("/{id}/like/{userId}")
+    public Review likeReview(@PathVariable Integer id, @PathVariable Integer userId) {
+        return reviewService.increaseUseful(id, userId);
+    }
+
+    /**
+     * Добавление дизлайка отзыву
+     *
+     * @param id     Идентификатор отзыва
+     * @param userId Идентификатор пользователя
+     * @return Отзыв
+     */
+    @PutMapping("/{id}/dislike/{userId}")
+    public Review dislikeReview(@PathVariable Integer id, @PathVariable Integer userId) {
+        return reviewService.decreaseUseful(id, userId);
+    }
+
+    /**
+     * Удаление лайка у отзыва
+     *
+     * @param id     Идентификатор отзыва
+     * @param userId Идентификатор пользователя
+     * @return Отзыв
+     */
+    @DeleteMapping("/{id}/like/{userId}")
+    public Review deleteLike(@PathVariable Integer id, @PathVariable Integer userId) {
+        return reviewService.decreaseUseful(id, userId);
+    }
+
+    /**
+     * Удаление дизлайка у отзыва
+     *
+     * @param id     Идентификатор отзыва
+     * @param userId Идентификатор пользователя
+     * @return Отзыв
+     */
+    @DeleteMapping("/{id}/dislike/{userId}")
+    public Review deleteDislike(@PathVariable Integer id, @PathVariable Integer userId) {
+        return reviewService.increaseUseful(id, userId);
     }
 }

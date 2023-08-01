@@ -30,7 +30,7 @@ public class ReviewRepositoryImpl implements ReviewRepository {
             + ":film_id, :useful)";
 
     private static final String SQL_UPDATE_REVIEW = "UPDATE public.review SET content = :content, "
-            + "is_positive = :is_positive, useful = :useful "
+            + "is_positive = :is_positive "
             + "WHERE id = :id";
 
     private static final String SQL_GET_REVIEW_BY_ID = "SELECT id, content, is_positive, user_id, film_id, useful "
@@ -39,7 +39,16 @@ public class ReviewRepositoryImpl implements ReviewRepository {
     private static final String SQL_DELETE_REVIEW_BY_ID = "DELETE FROM public.review WHERE id = :id";
 
     private static final String SQL_GET_ALL_REVIEWS = "SELECT id, content, is_positive, user_id, film_id, useful "
-            + "FROM public.review";
+            + "FROM public.review ORDER BY useful DESC";
+
+    private static final String SQL_GET_REVIEWS_BY_FILM_ID = "SELECT id, content, is_positive, user_id, film_id, useful "
+            + "FROM public.review WHERE film_id = :id ORDER BY useful DESC LIMIT :count";
+
+    private static final String SQL_LIKE_REVIEW = "UPDATE public.review SET useful = useful + 1 "
+            + "WHERE id = :id";
+
+    private static final String SQL_DISLIKE_REVIEW = "UPDATE public.review SET useful = useful - 1 "
+            + "WHERE id = :id";
 
 
     @Override
@@ -87,6 +96,35 @@ public class ReviewRepositoryImpl implements ReviewRepository {
     @Override
     public List<Review> getAllReviews() {
         return jdbcTemplate.query(SQL_GET_ALL_REVIEWS, reviewMapper);
+    }
+
+    @Override
+    public List<Review> getReviewsByFilmId(Integer id, Integer count) {
+        var params = new MapSqlParameterSource();
+
+        params.addValue("id", id);
+        params.addValue("count", count);
+        return jdbcTemplate.query(SQL_GET_REVIEWS_BY_FILM_ID, params, reviewMapper);
+    }
+
+    @Override
+    public Review increaseUseful(Integer id) {
+        var params = new MapSqlParameterSource();
+
+        params.addValue("id", id);
+        jdbcTemplate.update(SQL_LIKE_REVIEW, params);
+
+        return getReviewById(id).orElseThrow(() -> new ReviewNotFoundException(String.valueOf(id)));
+    }
+
+    @Override
+    public Review decreaseUseful(Integer id) {
+        var params = new MapSqlParameterSource();
+
+        params.addValue("id", id);
+        jdbcTemplate.update(SQL_DISLIKE_REVIEW, params);
+
+        return getReviewById(id).orElseThrow(() -> new ReviewNotFoundException(String.valueOf(id)));
     }
 
     @Override

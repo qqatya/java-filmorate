@@ -72,4 +72,37 @@ public class ReviewServiceImpl implements ReviewService {
         log.info("Returning all reviews");
         return reviewRepository.getAllReviews();
     }
+
+    @Override
+    public List<Review> getReviewsByFilmId(Integer id, Integer count) {
+        if (!filmRepository.doesExist(id)) {
+            throw new FilmNotFoundException(String.valueOf(id));
+        }
+        log.info("Getting reviews count = {} by filmId = {}", count, id);
+        return reviewRepository.getReviewsByFilmId(id, count);
+    }
+
+    @Override
+    public Review increaseUseful(Integer id, Integer userId) {
+        if (!reviewRepository.doesExist(id)) {
+            throw new ReviewNotFoundException(String.valueOf(id));
+        }
+        if (!userRepository.doesExist(userId)) {
+            throw new UserNotFoundException(String.valueOf(userId));
+        }
+        log.info("Increase useful rating for reviewId = {}", id);
+        return reviewRepository.increaseUseful(id);
+    }
+
+    @Override
+    public Review decreaseUseful(Integer id, Integer userId) {
+        if (!reviewRepository.doesExist(id)) {
+            throw new ReviewNotFoundException(String.valueOf(id));
+        }
+        if (!userRepository.doesExist(userId)) {
+            throw new UserNotFoundException(String.valueOf(userId));
+        }
+        log.info("Decrease useful rating for reviewId = {}", id);
+        return reviewRepository.decreaseUseful(id);
+    }
 }

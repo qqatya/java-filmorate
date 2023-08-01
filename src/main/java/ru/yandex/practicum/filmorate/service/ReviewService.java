@@ -42,4 +42,31 @@ public interface ReviewService {
      * @return Список отзывов
      */
     List<Review> getAllReviews();
+
+    /**
+     * Получение отзывов по идентификатору фильма
+     *
+     * @param id    Идентификатор фильма
+     * @param count Количество отзывов
+     * @return Список отзывов
+     */
+    List<Review> getReviewsByFilmId(Integer id, Integer count);
+
+    /**
+     * Увеличение рейтинга полезности отзыва
+     *
+     * @param id     Идентификатор отзыва
+     * @param userId Идентификатор пользователя
+     * @return Отзыв
+     */
+    Review increaseUseful(Integer id, Integer userId);
+
+    /**
+     * Снижение рейтинга полезности отзыва
+     *
+     * @param id     Идентификатор отзыва
+     * @param userId Идентификатор пользователя
+     * @return Отзыв
+     */
+    Review decreaseUseful(Integer id, Integer userId);
 }

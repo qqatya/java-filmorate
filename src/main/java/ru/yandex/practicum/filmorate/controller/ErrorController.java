@@ -93,7 +93,7 @@ public class ErrorController extends ResponseEntityExceptionHandler {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ResponseBody
     public ErrorInfo processReviewNotFoundException(ReviewNotFoundException e) {
-        log.debug("Can not find genre: {}", e.getMessage());
+        log.debug("Can not find review: {}", e.getMessage());
         return new ErrorInfo(e.getMessage());
     }
 
