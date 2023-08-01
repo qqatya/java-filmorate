@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Friend;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.repository.UserRepository;
@@ -106,5 +107,21 @@ public class UserServiceImpl implements UserService {
         }
         log.info("Getting common friends of userId = {} and userId = {}", userId, otherId);
         return userRepository.getCommonFriends(userId, otherId);
+    }
+
+    @Override
+    public void deleteUserById(Integer id) {
+        if (!userRepository.doesExist(id)) {
+            throw new UserNotFoundException(String.valueOf(id));
+        }
+        userRepository.deleteUserById(id);
+    }
+
+    public List<Film> getRecommendations(Integer id) {
+        if (!userRepository.doesExist(id)) {
+            throw new UserNotFoundException(String.valueOf(id));
+        }
+        log.info("Getting recommendation films by userId = {}", id);
+        return userRepository.getRecommendations(id);
     }
 }

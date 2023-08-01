@@ -67,6 +67,8 @@ public class FilmRepositoryImpl implements FilmRepository {
             "GROUP BY film_id " +
             "ORDER BY COUNT(film_id) DESC) ";
 
+    private static final String SQL_DELETE_FILM_BY_ID = "DELETE FROM public.film WHERE id = :id";
+
     @Override
     public Film insertFilm(Film film) {
         log.info("Creating film with id = {}", film.getId());
@@ -168,8 +170,16 @@ public class FilmRepositoryImpl implements FilmRepository {
     }
 
     @Override
+    public void deleteFilmById(Integer id) {
+        var params = new MapSqlParameterSource();
+
+        params.addValue("id", id);
+        jdbcTemplate.update(SQL_DELETE_FILM_BY_ID, params);
+    }
+
+    @Override
     public List<Film> getCommonFilms(Integer userId, Integer friendId) {
-        MapSqlParameterSource params = new MapSqlParameterSource();
+       var params = new MapSqlParameterSource();
 
         params.addValue("userId", userId);
         params.addValue("friendId", friendId);

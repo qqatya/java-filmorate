@@ -93,4 +93,12 @@ public class FilmServiceImpl implements FilmService {
         return filmRepository.getCommonFilms(userId,friendId);
     }
 
+
+    @Override
+    public void deleteFilmById(Integer id) {
+        if (!filmRepository.doesExist(id)) {
+            throw new FilmNotFoundException(String.valueOf(id));
+        }
+        filmRepository.deleteFilmById(id);
+    }
 }

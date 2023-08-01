@@ -70,4 +70,11 @@ public interface FilmService {
      * @return Список фильмов, отсортированных по популярности
      */
     List<Film> getCommonFilms(Integer userId, Integer friendId);
+
+    /**
+     * Удаление фильма по идентификатору
+     *
+     * @param id Идентификатор фильма
+     */
+    void deleteFilmById(Integer id);
 }
