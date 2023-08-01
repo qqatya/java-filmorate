@@ -39,6 +39,18 @@ public class FilmRepositoryImpl implements FilmRepository {
             + "WHERE film_id = :film_id";
     private static final String SQL_DELETE_LIKE = "DELETE FROM public.film_like "
             + "WHERE film_id = :film_id AND liked_person_id = :person_id";
+
+    private static final String SQL_COMMON_FILMS = "SELECT * FROM public.film AS f " +
+            "WHERE f.id IN (SELECT film_id " +
+            "FROM public.film_like " +
+            "WHERE liked_person_id = :userId " +
+            "INTERSECT " +
+            "SELECT film_id " +
+            "FROM public.film_like " +
+            "WHERE liked_person_id = :friendId) " +
+            "GROUP BY f.id " +
+            "ORDER BY COUNT(f.id) DESC ";
+
     private static final String SQL_DELETE_FILM_BY_ID = "DELETE FROM public.film WHERE id = :id";
     private static final String SQL_GET_DIRECTORS_BY_FILM_ID = "SELECT director_id FROM public.film_director "
             + "WHERE film_id = :film_id";
@@ -168,6 +180,20 @@ public class FilmRepositoryImpl implements FilmRepository {
 
         params.addValue("id", id);
         jdbcTemplate.update(SQL_DELETE_FILM_BY_ID, params);
+    }
+
+    @Override
+    public List<Film> getCommonFilms(Integer userId, Integer friendId) {
+        var params = new MapSqlParameterSource();
+
+        params.addValue("userId", userId);
+        params.addValue("friendId", friendId);
+        List<Film> films = jdbcTemplate.query(SQL_COMMON_FILMS, params, filmMapper);
+        return films.stream().peek(film -> {
+            film.setUsersLiked(getUsersLikedByFilmId(film.getId()));
+            film.setGenres(genreRepository.getByFilmId(film.getId()));
+            film.setMpa(ratingRepository.getByFilmId(film.getId()).orElse(null));
+        }).collect(Collectors.toList());
     }
 
 

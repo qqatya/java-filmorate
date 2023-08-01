@@ -84,6 +84,18 @@ public class FilmServiceImpl implements FilmService {
     }
 
     @Override
+    public List<Film> getCommonFilms(Integer userId, Integer friendId) {
+        if (!userRepository.doesExist(userId)) {
+            throw new UserNotFoundException(userId.toString());
+        }
+        if (!userRepository.doesExist(friendId)) {
+            throw new UserNotFoundException(friendId.toString());
+        }
+        log.info("Getting common films userId = {} and friendId = {}", userId, friendId);
+        return filmRepository.getCommonFilms(userId, friendId);
+    }
+
+    @Override
     public void deleteFilmById(Integer id) {
         if (!filmRepository.doesExist(id)) {
             throw new FilmNotFoundException(String.valueOf(id));

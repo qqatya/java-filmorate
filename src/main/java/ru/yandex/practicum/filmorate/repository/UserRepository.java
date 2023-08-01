@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.repository;
 
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.List;
@@ -86,4 +87,12 @@ public interface UserRepository {
      * @param id Идентификатор пользователя
      */
     void deleteUserById(Integer id);
+
+    /**
+     * Поиск рекомендаций по идентификатору пользователя
+     *
+     * @param id Идентификатор пользователя
+     * @return Список рекомендованных фильмов
+     */
+    List<Film> getRecommendations(Integer id);
 }
