@@ -70,4 +70,11 @@ public interface UserService {
      * @return Список общих друзей
      */
     List<User> getCommonFriends(Integer userId, Integer otherId);
+
+    /**
+     * Удаление пользователя по идентификатору
+     *
+     * @param id Идентификатор пользователя
+     */
+    void deleteUserById(Integer id);
 }

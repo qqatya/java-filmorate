@@ -79,4 +79,11 @@ public interface UserRepository {
      * @return Признак существования
      */
     boolean doesExist(Integer id);
+
+    /**
+     * Удаление пользователя по идентификатору
+     *
+     * @param id Идентификатор пользователя
+     */
+    void deleteUserById(Integer id);
 }

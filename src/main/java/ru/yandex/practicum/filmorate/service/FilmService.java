@@ -61,4 +61,11 @@ public interface FilmService {
      * @return Список фильмов
      */
     List<Film> getPopularFilms(Integer count);
+
+    /**
+     * Удаление фильма по идентификатору
+     *
+     * @param id Идентификатор фильма
+     */
+    void deleteFilmById(Integer id);
 }

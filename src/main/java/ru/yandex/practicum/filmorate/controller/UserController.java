@@ -89,7 +89,7 @@ public class UserController {
      * @param id Идентификатор пользователя
      * @return Список друзей
      */
-    @GetMapping("{id}/friends")
+    @GetMapping("/{id}/friends")
     public List<User> getAllFriends(@PathVariable Integer id) {
         return userService.getAllFriends(id);
     }
@@ -100,9 +100,19 @@ public class UserController {
      * @param otherId Идентификатор пользователя
      * @return Список общих друзей
      */
-    @GetMapping("{id}/friends/common/{otherId}")
+    @GetMapping("/{id}/friends/common/{otherId}")
     public List<User> getCommonFriends(@PathVariable("id") Integer userId,
                                        @PathVariable Integer otherId) {
         return userService.getCommonFriends(userId, otherId);
+    }
+
+    /**
+     * Удаление пользователя по идентификатору
+     *
+     * @param id Идентификатор пользователя
+     */
+    @DeleteMapping("/{id}")
+    public void deleteUserById(@PathVariable Integer id) {
+        userService.deleteUserById(id);
     }
 }

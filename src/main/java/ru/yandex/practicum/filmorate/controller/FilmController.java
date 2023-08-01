@@ -64,7 +64,7 @@ public class FilmController {
      * @param userId Идентификатор пользователя
      * @return Фильм с обновленным списком лайков
      */
-    @PutMapping("{id}/like/{userId}")
+    @PutMapping("/{id}/like/{userId}")
     public Film putLike(@PathVariable Integer id,
                         @PathVariable Integer userId) {
         return filmService.putLike(id, userId);
@@ -92,5 +92,15 @@ public class FilmController {
     @GetMapping("/popular")
     public List<Film> getPopularFilms(@RequestParam(defaultValue = "10") Integer count) {
         return filmService.getPopularFilms(count);
+    }
+
+    /**
+     * Удаление фильма по идентификатору
+     *
+     * @param id Идентификатор фильма
+     */
+    @DeleteMapping("/{id}")
+    public void deleteFilmById(@PathVariable Integer id) {
+        filmService.deleteFilmById(id);
     }
 }
