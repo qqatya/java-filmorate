@@ -193,6 +193,7 @@ public class FilmRepositoryImpl implements FilmRepository {
             film.setUsersLiked(getUsersLikedByFilmId(film.getId()));
             film.setGenres(genreRepository.getByFilmId(film.getId()));
             film.setMpa(ratingRepository.getByFilmId(film.getId()).orElse(null));
+            film.setDirectors(directorRepository.getByFilmId(film.getId()));
         }).collect(Collectors.toList());
     }
 
@@ -251,4 +252,5 @@ public class FilmRepositoryImpl implements FilmRepository {
                         film.setDirectors(directorRepository.getByFilmId(film.getId()));
                     }).collect(Collectors.toList());
         }
-    }}
+    }
+}
