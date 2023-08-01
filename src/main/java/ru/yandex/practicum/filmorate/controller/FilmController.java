@@ -102,8 +102,8 @@ public class FilmController {
      * @return Список фильмов, отсортированных по популярности
      */
     @GetMapping("/common")
-    public List<Film> getCommonFilms(@RequestParam Integer userId,@RequestParam Integer friendId) {
-        return filmService.getCommonFilms(userId,friendId);
+    public List<Film> getCommonFilms(@RequestParam Integer userId, @RequestParam Integer friendId) {
+        return filmService.getCommonFilms(userId, friendId);
     }
 
     /**

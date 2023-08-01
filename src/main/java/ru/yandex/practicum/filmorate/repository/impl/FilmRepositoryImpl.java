@@ -54,6 +54,7 @@ public class FilmRepositoryImpl implements FilmRepository {
 
     private static final String SQL_DELETE_LIKE = "DELETE FROM public.film_like "
             + "WHERE film_id = :film_id AND liked_person_id = :person_id";
+
     private static final String SQL_COMMON_FILMS = "SELECT * FROM film AS f " +
             "WHERE f.id IN (SELECT film_id " +
             "FROM film_like " +
@@ -179,7 +180,7 @@ public class FilmRepositoryImpl implements FilmRepository {
 
     @Override
     public List<Film> getCommonFilms(Integer userId, Integer friendId) {
-       var params = new MapSqlParameterSource();
+        var params = new MapSqlParameterSource();
 
         params.addValue("userId", userId);
         params.addValue("friendId", friendId);
