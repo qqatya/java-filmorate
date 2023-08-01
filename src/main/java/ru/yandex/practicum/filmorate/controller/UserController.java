@@ -122,6 +122,7 @@ public class UserController {
      * Поиск рекомендаций по идентификатору пользователя
      *
      * @param id Идентификатор пользователя
+     * @return Список рекомендованных фильмов
      */
     @GetMapping("/{id}/recommendations")
     public List<Film> getRecommendations(@PathVariable Integer id) {

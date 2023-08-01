@@ -65,7 +65,9 @@ public class UserRepositoryImpl implements UserRepository {
     private static final String SQL_GET_SIMILAR_USER = "SELECT l.liked_person_id FROM public.film_like AS l " +
             "WHERE l.film_id IN " +
             "(SELECT l2.film_id FROM public.film_like AS l2 WHERE l2.liked_person_id = :id) " +
-            "AND l.liked_person_id != :id";
+            "AND l.liked_person_id != :id " +
+            "GROUP BY l.liked_person_id " +
+            "ORDER BY COUNT(l.film_id) DESC LIMIT 1";
 
     private static final String SQL_GET_RECOMMENDATIONS = "SELECT l.film_id FROM public.film_like AS l " +
             "WHERE l.liked_person_id = :other_id AND l.film_id NOT IN " +
@@ -203,8 +205,12 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public List<Film> getRecommendations(Integer id) {
         var params = new MapSqlParameterSource();
+        Optional<Integer> otherId = getSimilarUserId(id);
+        if (otherId.isEmpty()) {
+            return new ArrayList<>();
+        }
         params.addValue("id", id);
-        params.addValue("other_id", getSimilarUserId(id).orElse(null));
+        params.addValue("other_id", otherId.get());
         List<Integer> filmId = jdbcTemplate.queryForList(SQL_GET_RECOMMENDATIONS, params, Integer.class);
         return filmId.stream()
                 .filter(i -> filmRepository.getFilmById(i).isPresent())

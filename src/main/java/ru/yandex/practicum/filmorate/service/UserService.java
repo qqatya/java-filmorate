@@ -83,6 +83,7 @@ public interface UserService {
      * Поиск рекомендаций по идентификатору пользователя
      *
      * @param id Идентификатор пользователя
+     * @return Список рекомендованных фильмов
      */
     List<Film> getRecommendations(Integer id);
 }
