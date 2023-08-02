@@ -87,5 +87,5 @@ public interface FilmRepository {
      */
     void deleteFilmById(Integer id);
 
-    List<Film>  getFilmsByDirectorId(Integer directorId, String sortBy);
+    List<Film> getFilmsByDirectorId(Integer directorId, String sortBy);
 }

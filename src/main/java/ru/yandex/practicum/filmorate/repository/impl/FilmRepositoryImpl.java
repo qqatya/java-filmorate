@@ -235,7 +235,7 @@ public class FilmRepositoryImpl implements FilmRepository {
 
         if ("year".equals(sortBy)) {
             return films.stream()
-                    .sorted((film1, film2) -> film2.getReleaseDate().compareTo(film1.getReleaseDate()))
+                    .sorted((film1, film2) -> film1.getReleaseDate().compareTo(film2.getReleaseDate()))
                     .peek(film -> {
                         film.setUsersLiked(getUsersLikedByFilmId(film.getId()));
                         film.setGenres(genreRepository.getByFilmId(film.getId()));

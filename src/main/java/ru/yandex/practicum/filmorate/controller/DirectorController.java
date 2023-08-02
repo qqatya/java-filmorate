@@ -57,6 +57,7 @@ public class DirectorController {
     public Director getDirectorById(@PathVariable Integer id) { //GET /directors/{id}- Получение режиссёра по id
         return directorService.getDirectorById(id);
     }
+
     /**
      * Удаление режиссера по идентификатору
      *

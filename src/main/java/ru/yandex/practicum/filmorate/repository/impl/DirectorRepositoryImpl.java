@@ -111,6 +111,7 @@ public class DirectorRepositoryImpl implements DirectorRepository {
     public boolean doesExist(Integer id) {
         return getAllDirectors().stream().anyMatch(director -> Objects.equals(director.getId(), id));
     }
+
     @Override
     public Set<Director> insertFilmDirectors(Set<Director> directors, Integer filmId) {
         List<Integer> directorIds = directors.stream()

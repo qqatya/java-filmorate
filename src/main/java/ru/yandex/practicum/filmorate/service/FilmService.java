@@ -83,5 +83,5 @@ public interface FilmService {
      *
      * @return Список фильмов
      */
-     List<Film> getFilmsByDirectorSortedBy(Integer directorId, String sortBy);
+    List<Film> getFilmsByDirectorSortedBy(Integer directorId, String sortBy);
 }

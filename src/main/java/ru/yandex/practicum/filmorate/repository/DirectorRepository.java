@@ -52,8 +52,11 @@ public interface DirectorRepository {
      * @return Признак существования
      */
     boolean doesExist(Integer id);
+
     Set<Director> insertFilmDirectors(Set<Director> directors, Integer filmId);
+
     Set<Director> updateFilmDirectors(Set<Director> directors, Integer filmId);
+
     void deleteFilmDirectors(Integer filmId);
 
     Set<Director> getByFilmId(Integer id);
