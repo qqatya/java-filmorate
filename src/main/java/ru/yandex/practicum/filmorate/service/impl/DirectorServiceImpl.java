@@ -21,7 +21,6 @@ public class DirectorServiceImpl implements DirectorService {
     @Override
     public Director createDirector(Director director) {
         directorValidator.validate(director);
-        log.info("Updating directorId = {}", director.getId());
         return directorRepository.insertDirector(director);
     }
 

@@ -109,6 +109,7 @@ public class FilmServiceImpl implements FilmService {
         if (!directorRepository.doesExist(directorId)) {
             throw new DirectorNotFoundException(String.valueOf(directorId));
         }
+        log.info("Getting films with directorId = {} by sort = {}", directorId, sortBy);
         return filmRepository.getFilmsByDirectorId(directorId, sortBy);
     }
 }

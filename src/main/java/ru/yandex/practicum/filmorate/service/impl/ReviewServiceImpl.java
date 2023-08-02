@@ -64,6 +64,7 @@ public class ReviewServiceImpl implements ReviewService {
         if (!reviewRepository.doesExist(id)) {
             throw new ReviewNotFoundException(String.valueOf(id));
         }
+        log.info("Deleting reviewId = {}", id);
         reviewRepository.deleteReviewById(id);
     }
 
