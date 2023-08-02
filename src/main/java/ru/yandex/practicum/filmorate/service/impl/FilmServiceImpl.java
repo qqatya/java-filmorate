@@ -104,7 +104,7 @@ public class FilmServiceImpl implements FilmService {
     }
 
     @Override
-    public List<Film> getFilmsByDirectorSortedBy(Integer directorId, String sortBy) {
+    public List<Film> getFilmsByDirectorIdSorted(Integer directorId, String sortBy) {
         if (!directorRepository.doesExist(directorId)) {
             throw new DirectorNotFoundException(String.valueOf(directorId));
         }

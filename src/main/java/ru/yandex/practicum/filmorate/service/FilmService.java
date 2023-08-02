@@ -81,7 +81,9 @@ public interface FilmService {
     /**
      * Получение всех фильмов режиссера, отсортированных по количеству лайков или году выпуска
      *
+     * @param directorId Идентификатор режиссёра
+     * @param sortBy     Параметр сортировки
      * @return Список фильмов
      */
-    List<Film> getFilmsByDirectorSortedBy(Integer directorId, String sortBy);
+    List<Film> getFilmsByDirectorIdSorted(Integer directorId, String sortBy);
 }

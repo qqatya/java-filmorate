@@ -21,6 +21,7 @@ public class DirectorServiceImpl implements DirectorService {
     @Override
     public Director createDirector(Director director) {
         directorValidator.validate(director);
+        log.info("Updating directorId = {}", director.getId());
         return directorRepository.insertDirector(director);
     }
 
@@ -42,7 +43,9 @@ public class DirectorServiceImpl implements DirectorService {
 
     @Override
     public Director getDirectorById(Integer id) {
-        return directorRepository.getDirectorById(id).orElseThrow(() -> new DirectorNotFoundException(String.valueOf(id)));
+        log.info("Getting directorId = {}", id);
+        return directorRepository.getDirectorById(id)
+                .orElseThrow(() -> new DirectorNotFoundException(String.valueOf(id)));
     }
 
     @Override
@@ -50,6 +53,7 @@ public class DirectorServiceImpl implements DirectorService {
         if (!directorRepository.doesExist(id)) {
             throw new DirectorNotFoundException(String.valueOf(id));
         }
+        log.info("Deleting directorId = {}", id);
         directorRepository.deleteDirectorById(id);
     }
 }

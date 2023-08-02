@@ -119,10 +119,12 @@ public class FilmController {
     /**
      * Получение всех фильмов режиссера, отсортированных по количеству лайков или году выпуска
      *
+     * @param directorId Идентификатор режиссёра
+     * @param sortBy     Параметр сортировки, по умолчанию "likes"
      * @return Список фильмов режиссера
      */
     @GetMapping("/director/{directorId}")
-    public List<Film> getDirectorsSortedBy(@PathVariable int directorId, @RequestParam(defaultValue = "likes") String sortBy) {
-        return filmService.getFilmsByDirectorSortedBy(directorId, sortBy);
+    public List<Film> getFilmsByDirectorIdSorted(@PathVariable int directorId, @RequestParam(defaultValue = "likes") String sortBy) {
+        return filmService.getFilmsByDirectorIdSorted(directorId, sortBy);
     }
 }

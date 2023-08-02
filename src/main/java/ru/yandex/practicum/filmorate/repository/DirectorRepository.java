@@ -34,7 +34,7 @@ public interface DirectorRepository {
      * Получение режиссера по идентификатору
      *
      * @param id Идентификатор режиссера
-     * @return режиссер (пустой, если такого пользователя нет)
+     * @return режиссер (пустой, если такого режиссёра нет)
      */
     Optional<Director> getDirectorById(Integer id);
 
@@ -53,11 +53,36 @@ public interface DirectorRepository {
      */
     boolean doesExist(Integer id);
 
+    /**
+     * Присвоение режиссеров фильму
+     *
+     * @param filmId    Идентификатор фильма
+     * @param directors Множество режиссеров
+     * @return Множество присвоенных режиссеров
+     */
     Set<Director> insertFilmDirectors(Set<Director> directors, Integer filmId);
 
+    /**
+     * Обновление режиссеров фильма
+     *
+     * @param filmId    Идентификатор фильма
+     * @param directors Множество режиссеров
+     * @return Множество обновленных режиссеров
+     */
     Set<Director> updateFilmDirectors(Set<Director> directors, Integer filmId);
 
+    /**
+     * Удаление всех режиссеров фильма
+     *
+     * @param filmId Идентификатор фильма
+     */
     void deleteFilmDirectors(Integer filmId);
 
+    /**
+     * Получение режиссеров по идентификатору фильма
+     *
+     * @param id Идентификатор фильма
+     * @return Множество режиссеров
+     */
     Set<Director> getByFilmId(Integer id);
 }

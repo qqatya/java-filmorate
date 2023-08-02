@@ -87,5 +87,12 @@ public interface FilmRepository {
      */
     void deleteFilmById(Integer id);
 
+    /**
+     * Получение списка фильмов по идентификатору режиссёра с сортировкой
+     *
+     * @param directorId Идентификатор режиссёра
+     * @param sortBy     Параметр сортировки
+     * @return Список фильмов (пустой, если такого режиссёра нет)
+     */
     List<Film> getFilmsByDirectorId(Integer directorId, String sortBy);
 }
