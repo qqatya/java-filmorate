@@ -67,7 +67,7 @@ public interface ReviewRepository {
      * @param id Идентификатор отзыва
      * @return Отзыв
      */
-    Review increaseUseful(Integer id);
+    Review increaseUsefulRate(Integer id, Integer userId);
 
     /**
      * Снижение рейтинга полезности отзыва
@@ -75,5 +75,25 @@ public interface ReviewRepository {
      * @param id Идентификатор отзыва
      * @return Отзыв
      */
-    Review decreaseUseful(Integer id);
+    Review decreaseUsefulRate(Integer id, Integer userId);
+
+    /**
+     * Проверка на существование лайка/дизлайка отзыву от пользователя
+     *
+     * @param id         Идентификатор отзыва
+     * @param userId     Идентификатор пользователя
+     * @param isPositive Признак лайк/дизлайк
+     * @return Признак существования лайка/дизлайка
+     */
+    Boolean isRatedByUser(Integer id, Integer userId, boolean isPositive);
+
+    /**
+     * Удаление оценки полезности отзыва
+     *
+     * @param id         Идентификатор отзыва
+     * @param userId     Идентификатор пользователя
+     * @param isPositive Признак лайк/дизлайк
+     * @return Отзыв
+     */
+    Review deleteUsefulRate(Integer id, Integer userId, boolean isPositive);
 }

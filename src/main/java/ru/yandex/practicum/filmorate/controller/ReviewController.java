@@ -85,7 +85,7 @@ public class ReviewController {
      */
     @PutMapping("/{id}/like/{userId}")
     public Review likeReview(@PathVariable Integer id, @PathVariable Integer userId) {
-        return reviewService.increaseUseful(id, userId);
+        return reviewService.increaseUsefulRate(id, userId);
     }
 
     /**
@@ -97,7 +97,7 @@ public class ReviewController {
      */
     @PutMapping("/{id}/dislike/{userId}")
     public Review dislikeReview(@PathVariable Integer id, @PathVariable Integer userId) {
-        return reviewService.decreaseUseful(id, userId);
+        return reviewService.decreaseUsefulRate(id, userId);
     }
 
     /**
@@ -109,7 +109,7 @@ public class ReviewController {
      */
     @DeleteMapping("/{id}/like/{userId}")
     public Review deleteLike(@PathVariable Integer id, @PathVariable Integer userId) {
-        return reviewService.decreaseUseful(id, userId);
+        return reviewService.deleteUsefulRate(id, userId, true);
     }
 
     /**
@@ -121,6 +121,6 @@ public class ReviewController {
      */
     @DeleteMapping("/{id}/dislike/{userId}")
     public Review deleteDislike(@PathVariable Integer id, @PathVariable Integer userId) {
-        return reviewService.increaseUseful(id, userId);
+        return reviewService.deleteUsefulRate(id, userId, false);
     }
 }

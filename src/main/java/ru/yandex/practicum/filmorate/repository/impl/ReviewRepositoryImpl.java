@@ -50,6 +50,16 @@ public class ReviewRepositoryImpl implements ReviewRepository {
     private static final String SQL_DISLIKE_REVIEW = "UPDATE public.review SET useful = useful - 1 "
             + "WHERE id = :id";
 
+    private static final String SQL_INSERT_REVIEW_RATE_USER = "INSERT INTO public.review_rate_user "
+            + "(review_id, rated_user_id, is_positive) VALUES (:id, :user_id, :is_positive)";
+
+    private static final String SQL_IS_RATED_BY_USER = "SELECT CASE WHEN COUNT(review_id) > 0 THEN TRUE ELSE FALSE END "
+            + "FROM public.review_rate_user "
+            + "WHERE review_id = :id AND rated_user_id = :user_id AND is_positive = :is_positive";
+
+    private static final String SQL_DELETE_REVIEW_RATE_USER = "DELETE FROM public.review_rate_user "
+            + "WHERE review_id = :id AND rated_user_id = :user_id AND is_positive = :is_positive";
+
 
     @Override
     public Review insertReview(Review review) {
@@ -108,22 +118,54 @@ public class ReviewRepositoryImpl implements ReviewRepository {
     }
 
     @Override
-    public Review increaseUseful(Integer id) {
+    public Review increaseUsefulRate(Integer id, Integer userId) {
         var params = new MapSqlParameterSource();
 
         params.addValue("id", id);
         jdbcTemplate.update(SQL_LIKE_REVIEW, params);
+        params.addValue("user_id", userId);
+        params.addValue("is_positive", true);
+        jdbcTemplate.update(SQL_INSERT_REVIEW_RATE_USER, params);
 
         return getReviewById(id).orElseThrow(() -> new ReviewNotFoundException(String.valueOf(id)));
     }
 
     @Override
-    public Review decreaseUseful(Integer id) {
+    public Review decreaseUsefulRate(Integer id, Integer userId) {
         var params = new MapSqlParameterSource();
 
         params.addValue("id", id);
         jdbcTemplate.update(SQL_DISLIKE_REVIEW, params);
+        params.addValue("user_id", userId);
+        params.addValue("is_positive", false);
+        jdbcTemplate.update(SQL_INSERT_REVIEW_RATE_USER, params);
 
+        return getReviewById(id).orElseThrow(() -> new ReviewNotFoundException(String.valueOf(id)));
+    }
+
+    @Override
+    public Boolean isRatedByUser(Integer id, Integer userId, boolean isPositive) {
+        var params = new MapSqlParameterSource();
+
+        params.addValue("id", id);
+        params.addValue("user_id", userId);
+        params.addValue("is_positive", isPositive);
+        return jdbcTemplate.queryForObject(SQL_IS_RATED_BY_USER, params, Boolean.class);
+    }
+
+    @Override
+    public Review deleteUsefulRate(Integer id, Integer userId, boolean isPositive) {
+        var params = new MapSqlParameterSource();
+
+        params.addValue("id", id);
+        params.addValue("user_id", userId);
+        params.addValue("is_positive", isPositive);
+        jdbcTemplate.update(SQL_DELETE_REVIEW_RATE_USER, params);
+        if (isPositive) {
+            jdbcTemplate.update(SQL_DISLIKE_REVIEW, params);
+        } else {
+            jdbcTemplate.update(SQL_LIKE_REVIEW, params);
+        }
         return getReviewById(id).orElseThrow(() -> new ReviewNotFoundException(String.valueOf(id)));
     }
 
