@@ -114,6 +114,7 @@ public class UserServiceImpl implements UserService {
         if (!userRepository.doesExist(id)) {
             throw new UserNotFoundException(String.valueOf(id));
         }
+        log.info("Deleting userId = {}", id);
         userRepository.deleteUserById(id);
     }
 
