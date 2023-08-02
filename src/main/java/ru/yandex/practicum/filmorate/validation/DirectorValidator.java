@@ -17,6 +17,6 @@ public class DirectorValidator {
         if (director.getName() == null || director.getName().isBlank()) {
             throw new ValidationException("Имя не может быть пустым");
         }
-        log.debug("User is valid");
+        log.debug("Director is valid");
     }
 }

@@ -9,30 +9,30 @@ public interface DirectorService {
      * Создание режиссёра
      *
      * @param director Объект, содержащий данные для создания
-     * @return Созданный пользователь
+     * @return Созданный режиссёр
      */
     Director createDirector(Director director);
 
     /**
-     * Обновление пользователя
+     * Обновление режиссёра
      *
      * @param director Объект, содержащий данные для обновления
-     * @return Обновленный пользователь
+     * @return Обновленный режиссёр
      */
     Director updateDirector(Director director);
 
     /**
-     * Получение всех пользователей
+     * Получение всех режиссёров
      *
-     * @return Список пользователей
+     * @return Список режиссёров
      */
     List<Director> getAllDirectors();
 
     /**
-     * Получение пользователя по идентификатору
+     * Получение режиссёра по идентификатору
      *
-     * @param id Идентификатор пользователя
-     * @return Пользователь
+     * @param id Идентификатор режиссёра
+     * @return режиссёр
      */
     Director getDirectorById(Integer id);
 

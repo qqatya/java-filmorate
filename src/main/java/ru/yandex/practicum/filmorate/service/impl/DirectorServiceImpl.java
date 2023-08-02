@@ -28,7 +28,7 @@ public class DirectorServiceImpl implements DirectorService {
     public Director updateDirector(Director director) {
         directorValidator.validate(director);
         if (directorRepository.doesExist(director.getId())) {
-            log.info("Updating userId = {}", director.getId());
+            log.info("Updating directorId = {}", director.getId());
             return directorRepository.updateDirector(director);
         }
         throw new DirectorNotFoundException(String.valueOf(director.getId()));

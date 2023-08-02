@@ -22,7 +22,7 @@ public class DirectorController {
      * @return Созданный режиссер
      */
     @PostMapping
-    public Director createUser(@Valid @RequestBody Director director) { //POST /directors - Создание режиссёра
+    public Director createDirector(@Valid @RequestBody Director director) {
         return directorService.createDirector(director);
     }
 
@@ -33,7 +33,7 @@ public class DirectorController {
      * @return Обновленный режиссер
      */
     @PutMapping
-    public Director updateDirector(@Valid @RequestBody Director director) { //PUT /directors - Изменение режиссёра
+    public Director updateDirector(@Valid @RequestBody Director director) {
         return directorService.updateDirector(director);
     }
 
@@ -43,7 +43,7 @@ public class DirectorController {
      * @return Список режиссеров
      */
     @GetMapping
-    public List<Director> getAllDirectors() { //GET /directors - Список всех режиссёров
+    public List<Director> getAllDirectors() {
         return directorService.getAllDirectors();
     }
 
@@ -54,7 +54,7 @@ public class DirectorController {
      * @return режиссёр
      */
     @GetMapping("/{id}")
-    public Director getDirectorById(@PathVariable Integer id) { //GET /directors/{id}- Получение режиссёра по id
+    public Director getDirectorById(@PathVariable Integer id) {
         return directorService.getDirectorById(id);
     }
 
