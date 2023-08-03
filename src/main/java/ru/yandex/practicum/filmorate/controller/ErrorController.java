@@ -84,6 +84,48 @@ public class ErrorController extends ResponseEntityExceptionHandler {
     }
 
     /**
+     * Обработчик DirectorNotFoundException
+     *
+     * @param e Эксепшн
+     * @return Объект, содержащий сообщение об ошибке
+     */
+    @ExceptionHandler(DirectorNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ResponseBody
+    public ErrorInfo processDirectorNotFoundException(DirectorNotFoundException e) {
+        log.debug("Can not find director: {}", e.getMessage());
+        return new ErrorInfo(e.getMessage());
+    }
+
+    /**
+     * Обработчик ReviewNotFoundException
+     *
+     * @param e Эксепшн
+     * @return Объект, содержащий сообщение об ошибке
+     */
+    @ExceptionHandler(ReviewNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ResponseBody
+    public ErrorInfo processReviewNotFoundException(ReviewNotFoundException e) {
+        log.debug("Can not find review: {}", e.getMessage());
+        return new ErrorInfo(e.getMessage());
+    }
+
+    /**
+     * Обработчик ReviewAlreadyRatedException
+     *
+     * @param e Эксепшн
+     * @return Объект, содержащий сообщение об ошибке
+     */
+    @ExceptionHandler(ReviewAlreadyRatedException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    public ErrorInfo processReviewAlreadyRatedException(ReviewAlreadyRatedException e) {
+        log.debug("Review rate already exists: {}", e.getMessage());
+        return new ErrorInfo(e.getMessage());
+    }
+
+    /**
      * Обработчик непредвиденных ошибок
      *
      * @param e Эксепшн

@@ -3,9 +3,11 @@ package ru.yandex.practicum.filmorate.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.DirectorNotFoundException;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.repository.DirectorRepository;
 import ru.yandex.practicum.filmorate.repository.FilmRepository;
 import ru.yandex.practicum.filmorate.repository.UserRepository;
 import ru.yandex.practicum.filmorate.service.FilmService;
@@ -19,6 +21,7 @@ import java.util.List;
 public class FilmServiceImpl implements FilmService {
     private final FilmRepository filmRepository;
     private final UserRepository userRepository;
+    private final DirectorRepository directorRepository;
     private final FilmValidator filmValidator;
 
     @Override
@@ -97,6 +100,16 @@ public class FilmServiceImpl implements FilmService {
         if (!filmRepository.doesExist(id)) {
             throw new FilmNotFoundException(String.valueOf(id));
         }
+        log.info("Deleting filmId = {}", id);
         filmRepository.deleteFilmById(id);
+    }
+
+    @Override
+    public List<Film> getFilmsByDirectorIdSorted(Integer directorId, String sortBy) {
+        if (!directorRepository.doesExist(directorId)) {
+            throw new DirectorNotFoundException(String.valueOf(directorId));
+        }
+        log.info("Getting films with directorId = {} by sort = {}", directorId, sortBy);
+        return filmRepository.getFilmsByDirectorId(directorId, sortBy);
     }
 }
