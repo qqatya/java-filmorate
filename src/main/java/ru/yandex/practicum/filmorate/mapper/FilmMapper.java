@@ -9,7 +9,6 @@ import ru.yandex.practicum.filmorate.service.RatingService;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashSet;
 
 @Component
 @RequiredArgsConstructor
