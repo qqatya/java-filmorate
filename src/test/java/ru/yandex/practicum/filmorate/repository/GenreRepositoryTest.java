@@ -12,6 +12,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.repository.impl.FilmRepositoryImpl;
 import ru.yandex.practicum.filmorate.repository.impl.GenreRepositoryImpl;
+import ru.yandex.practicum.filmorate.service.RatingService;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -31,6 +32,7 @@ class GenreRepositoryTest {
     private final GenreRepositoryImpl genreRepository;
 
     private final FilmRepositoryImpl filmRepository;
+    private final RatingService ratingService;
 
     @Test
     @Order(1)
@@ -40,6 +42,7 @@ class GenreRepositoryTest {
                 .description("The Butterfly Effect is a 2004 American science fiction thriller")
                 .releaseDate(LocalDate.of(2004, 1, 23))
                 .duration(113L)
+                .mpa(ratingService.getRatingById(1))
                 .build());
         Set<Genre> genres = Set.of(Genre.builder().id(2).name("Драма").build(),
                 Genre.builder().id(4).name("Триллер").build());
@@ -60,6 +63,7 @@ class GenreRepositoryTest {
                 .duration(113L)
                 .genres(Set.of(Genre.builder().id(2).name("Драма").build(),
                         Genre.builder().id(4).name("Триллер").build()))
+                        .mpa(ratingService.getRatingById(1))
                 .build());
         Set<Genre> genres = genreRepository.getByFilmId(film.getId());
 

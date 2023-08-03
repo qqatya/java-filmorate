@@ -10,9 +10,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Rating;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.repository.impl.FilmRepositoryImpl;
+import ru.yandex.practicum.filmorate.repository.impl.GenreRepositoryImpl;
+import ru.yandex.practicum.filmorate.repository.impl.RatingRepositoryImpl;
 import ru.yandex.practicum.filmorate.repository.impl.UserRepositoryImpl;
+import ru.yandex.practicum.filmorate.service.GenreService;
+import ru.yandex.practicum.filmorate.service.RatingService;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -28,6 +33,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class FilmRepositoryTest {
 
     private final FilmRepositoryImpl filmRepository;
+    private final RatingService ratingService;
 
     private final UserRepositoryImpl userRepository;
 
@@ -43,10 +49,12 @@ class FilmRepositoryTest {
         String name = "Shutter Island";
 
         Film film = filmRepository.insertFilm(Film.builder()
+                .id(1)
                 .name(name)
                 .description(DESCRIPTION)
                 .releaseDate(RELEASE_DATE)
                 .duration(DURATION)
+                .mpa(ratingService.getRatingById(1))
                 .build());
 
         assertTrue(film.getId() == 1 || film.getId() == 2);
@@ -67,6 +75,7 @@ class FilmRepositoryTest {
                 .description(DESCRIPTION)
                 .releaseDate(RELEASE_DATE)
                 .duration(DURATION)
+                .mpa(ratingService.getRatingById(1))
                 .build());
 
         assertEquals(1, film.getId());
