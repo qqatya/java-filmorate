@@ -67,6 +67,40 @@ public class FilmRepositoryImpl implements FilmRepository {
             "ORDER BY COUNT(f.id) DESC ";
 
     private static final String SQL_DELETE_FILM_BY_ID = "DELETE FROM public.film WHERE id = :id";
+    private static final String SQL_POPULAR_FILMS = "SELECT * FROM film AS f " +
+            "LEFT JOIN film_like AS fl ON  fl.film_id = f.id " +
+            "GROUP BY f.id " +
+            "ORDER BY COUNT(fl.liked_person_id) DESC " +
+            "LIMIT :count ";
+
+    private static final String SQL_POPULAR_FILMS_GENRE = "SELECT * " +
+            "FROM public.film AS f " +
+            "LEFT JOIN film_like AS fl ON f.id = fl.film_id " +
+            "LEFT JOIN film_genre AS fg ON f.id = fg.film_id " +
+            "LEFT JOIN genre AS g ON fg.genre_id = g.id " +
+            "WHERE g.id = :genreId " +
+            "GROUP BY f.id " +
+            "ORDER BY COUNT(fl.liked_person_id) DESC " +
+            "LIMIT :count ";
+
+    private static final String SQL_POPULAR_FILMS_YEAR = "SELECT * " +
+            "FROM public.film AS f " +
+            "LEFT JOIN film_like AS fl ON f.id = fl.film_id " +
+            "WHERE EXTRACT(YEAR FROM f.release_date) = :year " +
+            "GROUP BY f.id  " +
+            "ORDER BY COUNT(fl.liked_person_id) DESC " +
+            "LIMIT :count ";
+
+    private static final String SQL_POPULAR_FILMS_GENRE_YEAR = "SELECT * " +
+            "FROM public.film AS f " +
+            "LEFT JOIN film_like AS fl ON f.id = fl.film_id " +
+            "LEFT JOIN film_genre AS fg ON f.id = fg.film_id " +
+            "LEFT JOIN genre AS g ON fg.genre_id = g.id " +
+            "WHERE g.id = :genreId AND EXTRACT(YEAR FROM f.release_date) = :year " +
+            "GROUP BY f.id " +
+            "ORDER BY COUNT(fl.liked_person_id) DESC " +
+            "LIMIT :count ";
+
 
     @Override
     public Film insertFilm(Film film) {
@@ -156,11 +190,23 @@ public class FilmRepositoryImpl implements FilmRepository {
     }
 
     @Override
-    public List<Film> getPopularFilms(Integer count) {
-        return getAllFilms().stream()
-                .sorted((film1, film2) -> film2.getUsersLiked().size() - film1.getUsersLiked().size())
-                .limit(count)
-                .collect(Collectors.toList());
+    public List<Film> getPopularFilms(Integer count, Integer genreId, Integer year) {
+        var params = new MapSqlParameterSource();
+        params.addValue("count", count);
+        if (genreId != null && year == null) {
+            params.addValue("genreId", genreId);
+            return jdbcTemplate.query(SQL_POPULAR_FILMS_GENRE, params, filmMapper);
+        }
+        if (year != null && genreId == null) {
+            params.addValue("year", year);
+            return jdbcTemplate.query(SQL_POPULAR_FILMS_YEAR, params, filmMapper);
+        }
+        if (genreId != null && year != null) {
+            params.addValue("genreId", genreId);
+            params.addValue("year", year);
+            return jdbcTemplate.query(SQL_POPULAR_FILMS_GENRE_YEAR, params, filmMapper);
+        }
+        return jdbcTemplate.query(SQL_POPULAR_FILMS, params, filmMapper);
     }
 
     @Override

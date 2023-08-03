@@ -56,12 +56,17 @@ public interface FilmRepository {
     Film deleteLike(Integer id, Integer userId);
 
     /**
-     * Получение фильмов по маскимальному количеству лайков
+     * Добавить возможность выводить топ-N по количеству фильмов лайков
+     * Фильтрация должна быть по заданным параметрам
+     * 1.По жанру.
+     * 2.За указанный год.
      *
-     * @param count Количество фильмов
+     * @param count   Количество фильмов
+     * @param genreId Идентификатор жанра
+     * @param year    год выпуска
      * @return Список фильмов
      */
-    List<Film> getPopularFilms(Integer count);
+    List<Film> getPopularFilms(Integer count, Integer genreId, Integer year);
 
     /**
      * Проверка на существование фильма
