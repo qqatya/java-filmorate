@@ -26,7 +26,7 @@ public class FilmMapper implements RowMapper<Film> {
                 .releaseDate(rs.getDate("release_date").toLocalDate())
                 .duration(rs.getLong("duration"))
                 .mpa(ratingService.getRatingById(rs.getInt("rating_id")))
-                .genres(new HashSet<>(genreRepository.getByFilmId(rs.getInt("id"))))
+                .genres(genreRepository.getByFilmId(rs.getInt("id")))
                 .build();
     }
 }
