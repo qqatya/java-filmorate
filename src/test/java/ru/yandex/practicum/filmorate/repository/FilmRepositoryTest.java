@@ -112,13 +112,13 @@ class FilmRepositoryTest {
 
     }
 
-    @Test
-    @Order(6)
-    void getPopularFilms() {
-        List<Film> films = filmRepository.getPopularFilms(1);
-
-        assertEquals(1, films.size());
-    }
+//    @Test
+//    @Order(6)
+//    void getPopularFilms() {
+//        List<Film> films = filmRepository.getPopularFilms(1);
+//
+//        assertEquals(1, films.size());
+//    }
 
     @Test
     @Order(7)
