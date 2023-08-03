@@ -7,7 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 @Component
-public class LikedPersonMapper implements RowMapper<Integer> {
+public class UserLikeMapper implements RowMapper<Integer> {
     @Override
     public Integer mapRow(ResultSet rs, int rowNum) throws SQLException {
         return rs.getInt("liked_person_id");

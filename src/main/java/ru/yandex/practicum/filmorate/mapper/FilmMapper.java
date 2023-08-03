@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.repository.DirectorRepository;
 import ru.yandex.practicum.filmorate.repository.GenreRepository;
 import ru.yandex.practicum.filmorate.repository.RatingRepository;
+import ru.yandex.practicum.filmorate.repository.UserLikeRepository;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -21,6 +22,8 @@ public class FilmMapper implements RowMapper<Film> {
 
     private final DirectorRepository directorRepository;
 
+    private final UserLikeRepository userLikeRepository;
+
     @Override
     public Film mapRow(ResultSet rs, int rowNum) throws SQLException {
         Integer filmId = rs.getInt("id");
@@ -31,8 +34,9 @@ public class FilmMapper implements RowMapper<Film> {
                 .description(rs.getString("description"))
                 .releaseDate(rs.getDate("release_date").toLocalDate())
                 .duration(rs.getLong("duration"))
+                .usersLiked(userLikeRepository.getUsersLikedByFilmId(filmId))
                 .mpa(ratingRepository.getByFilmId(filmId).orElse(null))
-                .genres((genreRepository.getByFilmId(rs.getInt("id"))))
+                .genres(genreRepository.getByFilmId(rs.getInt("id")))
                 .directors(directorRepository.getByFilmId(filmId))
                 .build();
     }

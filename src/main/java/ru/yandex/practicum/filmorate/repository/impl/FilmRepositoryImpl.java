@@ -9,11 +9,11 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
-import ru.yandex.practicum.filmorate.mapper.LikedPersonMapper;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.repository.DirectorRepository;
 import ru.yandex.practicum.filmorate.repository.FilmRepository;
 import ru.yandex.practicum.filmorate.repository.GenreRepository;
+import ru.yandex.practicum.filmorate.repository.UserLikeRepository;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -26,7 +26,8 @@ public class FilmRepositoryImpl implements FilmRepository {
     private final GenreRepository genreRepository;
     private final DirectorRepository directorRepository;
     private final FilmMapper filmMapper;
-    private final LikedPersonMapper likedPersonMapper;
+    private final UserLikeRepository userLikeRepository;
+
     private static final String SQL_INSERT_FILM = "INSERT INTO public.film "
             + "(name, description, release_date, duration, rating_id) VALUES(:name, :description, :release_date, "
             + ":duration, :rating_id)";
@@ -38,8 +39,6 @@ public class FilmRepositoryImpl implements FilmRepository {
             + "FROM public.film";
     private static final String SQL_INSERT_LIKE = "INSERT INTO public.film_like (film_id, liked_person_id) "
             + "VALUES (:film_id, :person_id)";
-    private static final String SQL_GET_LIKES_BY_FILM_ID = "SELECT liked_person_id FROM public.film_like "
-            + "WHERE film_id = :film_id";
     private static final String SQL_DELETE_LIKE = "DELETE FROM public.film_like "
             + "WHERE film_id = :film_id AND liked_person_id = :person_id";
 
@@ -152,7 +151,7 @@ public class FilmRepositoryImpl implements FilmRepository {
 
         jdbcTemplate.update(SQL_INSERT_LIKE, params);
         Film film = getFilmById(id).orElseThrow(() -> new FilmNotFoundException(String.valueOf(id)));
-        Set<Integer> usersLiked = getUsersLikedByFilmId(id);
+        Set<Integer> usersLiked = userLikeRepository.getUsersLikedByFilmId(id);
 
         film.setUsersLiked(usersLiked);
         log.debug("FilmId = {} list of users liked: {}", id, usersLiked);
@@ -165,7 +164,7 @@ public class FilmRepositoryImpl implements FilmRepository {
 
         jdbcTemplate.update(SQL_DELETE_LIKE, params);
         Film film = getFilmById(id).orElseThrow(() -> new FilmNotFoundException(String.valueOf(id)));
-        Set<Integer> usersLiked = getUsersLikedByFilmId(id);
+        Set<Integer> usersLiked = userLikeRepository.getUsersLikedByFilmId(id);
 
         film.setUsersLiked(usersLiked);
         log.debug("FilmId = {} list of users liked: {}", id, usersLiked);
@@ -236,13 +235,6 @@ public class FilmRepositoryImpl implements FilmRepository {
         params.addValue("film_id", id);
         params.addValue("person_id", userId);
         return params;
-    }
-
-    private Set<Integer> getUsersLikedByFilmId(Integer id) {
-        var params = new MapSqlParameterSource();
-
-        params.addValue("film_id", id);
-        return new HashSet<>(jdbcTemplate.query(SQL_GET_LIKES_BY_FILM_ID, params, likedPersonMapper));
     }
 
     public List<Film> getFilmsByDirectorId(Integer id, String sortBy) {
