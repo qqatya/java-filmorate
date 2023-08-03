@@ -14,7 +14,6 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.repository.DirectorRepository;
 import ru.yandex.practicum.filmorate.repository.FilmRepository;
 import ru.yandex.practicum.filmorate.repository.GenreRepository;
-import ru.yandex.practicum.filmorate.repository.RatingRepository;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -25,7 +24,6 @@ import java.util.stream.Collectors;
 public class FilmRepositoryImpl implements FilmRepository {
     private final NamedParameterJdbcTemplate jdbcTemplate;
     private final GenreRepository genreRepository;
-    private final RatingRepository ratingRepository;
     private final DirectorRepository directorRepository;
     private final FilmMapper filmMapper;
     private final LikedPersonMapper likedPersonMapper;
@@ -137,32 +135,15 @@ public class FilmRepositoryImpl implements FilmRepository {
 
     @Override
     public List<Film> getAllFilms() {
-        List<Film> films = jdbcTemplate.query(SQL_GET_ALL_FILMS, filmMapper);
-
-        return films.stream().peek(film -> {
-            film.setUsersLiked(getUsersLikedByFilmId(film.getId()));
-            film.setGenres(genreRepository.getByFilmId(film.getId()));
-            film.setMpa(ratingRepository.getByFilmId(film.getId()).orElse(null));
-            film.setDirectors(directorRepository.getByFilmId(film.getId()));
-        }).collect(Collectors.toList());
+        return jdbcTemplate.query(SQL_GET_ALL_FILMS, filmMapper);
     }
 
     @Override
     public Optional<Film> getFilmById(Integer id) {
-        Film film = null;
         var params = new MapSqlParameterSource();
 
         params.addValue("id", id);
-        Optional<Film> filmOptional = jdbcTemplate.query(SQL_GET_FILM_BY_ID, params, filmMapper).stream().findFirst();
-
-        if (filmOptional.isPresent()) {
-            film = filmOptional.get();
-            film.setUsersLiked(getUsersLikedByFilmId(id));
-            film.setGenres(genreRepository.getByFilmId(id));
-            film.setDirectors(directorRepository.getByFilmId(id));
-            film.setMpa(ratingRepository.getByFilmId(id).orElse(null));
-        }
-        return Optional.ofNullable(film);
+        return jdbcTemplate.query(SQL_GET_FILM_BY_ID, params, filmMapper).stream().findFirst();
     }
 
     @Override
@@ -230,13 +211,7 @@ public class FilmRepositoryImpl implements FilmRepository {
 
         params.addValue("userId", userId);
         params.addValue("friendId", friendId);
-        List<Film> films = jdbcTemplate.query(SQL_COMMON_FILMS, params, filmMapper);
-        return films.stream().peek(film -> {
-            film.setUsersLiked(getUsersLikedByFilmId(film.getId()));
-            film.setGenres(genreRepository.getByFilmId(film.getId()));
-            film.setMpa(ratingRepository.getByFilmId(film.getId()).orElse(null));
-            film.setDirectors(directorRepository.getByFilmId(film.getId()));
-        }).collect(Collectors.toList());
+        return jdbcTemplate.query(SQL_COMMON_FILMS, params, filmMapper);
     }
 
 
@@ -278,21 +253,11 @@ public class FilmRepositoryImpl implements FilmRepository {
         if ("year".equals(sortBy)) {
             return films.stream()
                     .sorted(Comparator.comparingInt(film -> film.getReleaseDate().getYear()))
-                    .peek(film -> {
-                        film.setUsersLiked(getUsersLikedByFilmId(film.getId()));
-                        film.setGenres(genreRepository.getByFilmId(film.getId()));
-                        film.setMpa(ratingRepository.getByFilmId(film.getId()).orElse(null));
-                        film.setDirectors(directorRepository.getByFilmId(film.getId()));
-                    }).collect(Collectors.toList());
+                    .collect(Collectors.toList());
         } else {
             return films.stream()
                     .sorted((film1, film2) -> film2.getUsersLiked().size() - film1.getUsersLiked().size())
-                    .peek(film -> {
-                        film.setUsersLiked(getUsersLikedByFilmId(film.getId()));
-                        film.setGenres(genreRepository.getByFilmId(film.getId()));
-                        film.setMpa(ratingRepository.getByFilmId(film.getId()).orElse(null));
-                        film.setDirectors(directorRepository.getByFilmId(film.getId()));
-                    }).collect(Collectors.toList());
+                    .collect(Collectors.toList());
         }
     }
 }
