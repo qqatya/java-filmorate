@@ -23,7 +23,12 @@ import java.util.stream.Collectors;
 @Slf4j
 @RequiredArgsConstructor
 public class FilmRepositoryImpl implements FilmRepository {
-
+    private final NamedParameterJdbcTemplate jdbcTemplate;
+    private final GenreRepository genreRepository;
+    private final RatingRepository ratingRepository;
+    private final DirectorRepository directorRepository;
+    private final FilmMapper filmMapper;
+    private final LikedPersonMapper likedPersonMapper;
     private static final String SQL_INSERT_FILM = "INSERT INTO public.film "
             + "(name, description, release_date, duration, rating_id) VALUES(:name, :description, :release_date, "
             + ":duration, :rating_id)";
@@ -59,24 +64,16 @@ public class FilmRepositoryImpl implements FilmRepository {
             "FROM public.film INNER JOIN public.film_director ON film_director.film_id = film.id " +
             "WHERE film_director.director_id = :director_id";
 
-    private final NamedParameterJdbcTemplate jdbcTemplate;
-    private final GenreRepository genreRepository;
-    private final RatingRepository ratingRepository;
-    private final DirectorRepository directorRepository;
-    private final FilmMapper filmMapper;
-    private final LikedPersonMapper likedPersonMapper;
     private static final String SQL_POPULAR_FILMS = "SELECT * FROM film AS f " +
             "LEFT JOIN film_like AS fl ON  fl.film_id = f.id " +
             "GROUP BY f.id " +
             "ORDER BY COUNT(fl.liked_person_id) DESC " +
             "LIMIT :count ";
-
     private static final String SQL_POPULAR_FILMS_GENRE = "SELECT * " +
             "FROM public.film AS f " +
             "LEFT JOIN film_like AS fl ON f.id = fl.film_id " +
             "LEFT JOIN film_genre AS fg ON f.id = fg.film_id " +
-            "LEFT JOIN genre AS g ON fg.genre_id = g.id " +
-            "WHERE g.id = :genreId " +
+            "WHERE fg.genre_id = :genreId " +
             "GROUP BY f.id " +
             "ORDER BY COUNT(fl.liked_person_id) DESC " +
             "LIMIT :count ";
@@ -93,8 +90,7 @@ public class FilmRepositoryImpl implements FilmRepository {
             "FROM public.film AS f " +
             "LEFT JOIN film_like AS fl ON f.id = fl.film_id " +
             "LEFT JOIN film_genre AS fg ON f.id = fg.film_id " +
-            "LEFT JOIN genre AS g ON fg.genre_id = g.id " +
-            "WHERE g.id = :genreId AND EXTRACT(YEAR FROM f.release_date) = :year " +
+            "WHERE fg.genre_id = :genreId AND EXTRACT(YEAR FROM f.release_date) = :year " +
             "GROUP BY f.id " +
             "ORDER BY COUNT(fl.liked_person_id) DESC " +
             "LIMIT :count ";
