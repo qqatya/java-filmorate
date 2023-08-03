@@ -64,7 +64,7 @@ public class FilmRepositoryImpl implements FilmRepository {
 
     private static final String SQL_POPULAR_FILMS = "SELECT * FROM film AS f " +
             "LEFT JOIN film_like AS fl ON  fl.film_id = f.id " +
-            "GROUP BY f.id " +
+            "GROUP BY f.id, fl.liked_person_id " +
             "ORDER BY COUNT(fl.liked_person_id) DESC " +
             "LIMIT :count ";
     private static final String SQL_POPULAR_FILMS_GENRE = "SELECT * " +
