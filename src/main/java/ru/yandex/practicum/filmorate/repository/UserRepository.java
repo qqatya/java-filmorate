@@ -95,4 +95,5 @@ public interface UserRepository {
      * @return Список рекомендованных фильмов
      */
     List<Film> getRecommendations(Integer id);
+
 }

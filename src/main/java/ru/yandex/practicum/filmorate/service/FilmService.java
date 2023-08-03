@@ -55,12 +55,14 @@ public interface FilmService {
     Film deleteLike(Integer id, Integer userId);
 
     /**
-     * Получение фильмов по маскимальному количеству лайков
+     * Получение топ-N фильмов по количеству лайков с возможностью фильтрации по жанру и году выпуска
      *
-     * @param count Количество фильмов
+     * @param count   Количество фильмов
+     * @param genreId Идентификатор жанра
+     * @param year    год выпуска
      * @return Список фильмов
      */
-    List<Film> getPopularFilms(Integer count);
+    List<Film> getPopularFilms(Integer count, Integer genreId, Integer year);
 
     /**
      * Вывод общих с другом фильмов с сортировкой по их популярности

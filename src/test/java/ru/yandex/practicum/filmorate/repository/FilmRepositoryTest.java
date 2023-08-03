@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.repository;
 
 import lombok.RequiredArgsConstructor;
-
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -13,6 +12,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.repository.impl.FilmRepositoryImpl;
 import ru.yandex.practicum.filmorate.repository.impl.UserRepositoryImpl;
+import ru.yandex.practicum.filmorate.service.RatingService;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -28,6 +28,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class FilmRepositoryTest {
 
     private final FilmRepositoryImpl filmRepository;
+    private final RatingService ratingService;
 
     private final UserRepositoryImpl userRepository;
 
@@ -43,10 +44,12 @@ class FilmRepositoryTest {
         String name = "Shutter Island";
 
         Film film = filmRepository.insertFilm(Film.builder()
+                .id(1)
                 .name(name)
                 .description(DESCRIPTION)
                 .releaseDate(RELEASE_DATE)
                 .duration(DURATION)
+                .mpa(ratingService.getRatingById(1))
                 .build());
 
         assertTrue(film.getId() == 1 || film.getId() == 2);
@@ -67,6 +70,7 @@ class FilmRepositoryTest {
                 .description(DESCRIPTION)
                 .releaseDate(RELEASE_DATE)
                 .duration(DURATION)
+                .mpa(ratingService.getRatingById(1))
                 .build());
 
         assertEquals(1, film.getId());
@@ -115,7 +119,18 @@ class FilmRepositoryTest {
     @Test
     @Order(6)
     void getPopularFilms() {
-        List<Film> films = filmRepository.getPopularFilms(1);
+        String name = "Shutter Island";
+
+        Film film = filmRepository.insertFilm(Film.builder()
+                .id(1)
+                .name(name)
+                .description(DESCRIPTION)
+                .releaseDate(RELEASE_DATE)
+                .duration(DURATION)
+                .mpa(ratingService.getRatingById(1))
+                .build());
+
+        List<Film> films = filmRepository.getPopularFilms(1, null, 2010);
 
         assertEquals(1, films.size());
     }

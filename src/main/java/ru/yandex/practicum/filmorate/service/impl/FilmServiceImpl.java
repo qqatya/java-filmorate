@@ -78,9 +78,9 @@ public class FilmServiceImpl implements FilmService {
     }
 
     @Override
-    public List<Film> getPopularFilms(Integer count) {
-        log.info("Getting popular films amount = {}", count);
-        return filmRepository.getPopularFilms(count);
+    public List<Film> getPopularFilms(Integer count, Integer genreId, Integer year) {
+        log.info("Getting popular films amount = {}, genreId = {}, year = {}", count, genreId, year);
+        return filmRepository.getPopularFilms(count, genreId, year);
     }
 
     @Override

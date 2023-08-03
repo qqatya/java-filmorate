@@ -84,14 +84,18 @@ public class FilmController {
     }
 
     /**
-     * Получение фильмов по маскимальному количеству лайков
+     * Получение топ-N фильмов по количеству лайков с возможностью фильтрации по жанру и году выпуска
      *
-     * @param count Количество фильмов
+     * @param count   Количество фильмов
+     * @param genreId Идентификатор жанра
+     * @param year    год выпуска
      * @return Список фильмов
      */
     @GetMapping("/popular")
-    public List<Film> getPopularFilms(@RequestParam(defaultValue = "10") Integer count) {
-        return filmService.getPopularFilms(count);
+    public List<Film> getPopularFilms(@RequestParam(defaultValue = "10") Integer count,
+                                      @RequestParam(required = false) Integer genreId,
+                                      @RequestParam(required = false) Integer year) {
+        return filmService.getPopularFilms(count, genreId, year);
     }
 
     /**
