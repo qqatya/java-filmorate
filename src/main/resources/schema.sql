@@ -59,3 +59,9 @@ CREATE TABLE IF NOT EXISTS review (
                                 film_id INTEGER REFERENCES film (id) ON DELETE CASCADE,
                                 useful INTEGER
 );
+
+CREATE TABLE IF NOT EXISTS review_rate_user (
+                                         review_id INTEGER REFERENCES review (id) ON DELETE CASCADE,
+                                         rated_user_id INTEGER REFERENCES person (id) ON DELETE CASCADE,
+                                         is_positive BOOLEAN
+);

@@ -112,6 +112,20 @@ public class ErrorController extends ResponseEntityExceptionHandler {
     }
 
     /**
+     * Обработчик ReviewAlreadyRatedException
+     *
+     * @param e Эксепшн
+     * @return Объект, содержащий сообщение об ошибке
+     */
+    @ExceptionHandler(ReviewAlreadyRatedException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    public ErrorInfo processReviewAlreadyRatedException(ReviewAlreadyRatedException e) {
+        log.debug("Review rate already exists: {}", e.getMessage());
+        return new ErrorInfo(e.getMessage());
+    }
+
+    /**
      * Обработчик непредвиденных ошибок
      *
      * @param e Эксепшн

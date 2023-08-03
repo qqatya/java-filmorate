@@ -3,9 +3,7 @@ package ru.yandex.practicum.filmorate.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
-import ru.yandex.practicum.filmorate.exception.ReviewNotFoundException;
-import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
+import ru.yandex.practicum.filmorate.exception.*;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.repository.FilmRepository;
 import ru.yandex.practicum.filmorate.repository.ReviewRepository;
@@ -84,26 +82,47 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
-    public Review increaseUseful(Integer id, Integer userId) {
+    public Review increaseUsefulRate(Integer id, Integer userId) {
         if (!reviewRepository.doesExist(id)) {
             throw new ReviewNotFoundException(String.valueOf(id));
         }
         if (!userRepository.doesExist(userId)) {
             throw new UserNotFoundException(String.valueOf(userId));
         }
+        if (reviewRepository.isRatedByUser(id, userId, true)) {
+            throw new ReviewAlreadyRatedException(String.valueOf(id));
+        }
         log.info("Increase useful rating for reviewId = {}", id);
-        return reviewRepository.increaseUseful(id);
+        return reviewRepository.increaseUsefulRate(id, userId);
     }
 
     @Override
-    public Review decreaseUseful(Integer id, Integer userId) {
+    public Review decreaseUsefulRate(Integer id, Integer userId) {
         if (!reviewRepository.doesExist(id)) {
             throw new ReviewNotFoundException(String.valueOf(id));
         }
         if (!userRepository.doesExist(userId)) {
             throw new UserNotFoundException(String.valueOf(userId));
         }
+        if (reviewRepository.isRatedByUser(id, userId, false)) {
+            throw new ReviewAlreadyRatedException(String.valueOf(id));
+        }
         log.info("Decrease useful rating for reviewId = {}", id);
-        return reviewRepository.decreaseUseful(id);
+        return reviewRepository.decreaseUsefulRate(id, userId);
+    }
+
+    @Override
+    public Review deleteUsefulRate(Integer id, Integer userId, boolean isPositive) {
+        if (!reviewRepository.doesExist(id)) {
+            throw new ReviewNotFoundException(String.valueOf(id));
+        }
+        if (!userRepository.doesExist(userId)) {
+            throw new UserNotFoundException(String.valueOf(userId));
+        }
+        if (!reviewRepository.isRatedByUser(id, userId, isPositive)) {
+            throw new ReviewRateNotFoundException(String.valueOf(id));
+        }
+        log.info("Deleting rate for reviewId = {} from userId = {}", id, userId);
+        return reviewRepository.deleteUsefulRate(id, userId, isPositive);
     }
 }
