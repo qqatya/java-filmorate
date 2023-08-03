@@ -9,12 +9,12 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
-import ru.yandex.practicum.filmorate.mapper.FriendMapper;
 import ru.yandex.practicum.filmorate.mapper.UserMapper;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Friend;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.repository.FilmRepository;
+import ru.yandex.practicum.filmorate.repository.FriendRepository;
 import ru.yandex.practicum.filmorate.repository.UserRepository;
 
 import java.util.*;
@@ -29,9 +29,9 @@ public class UserRepositoryImpl implements UserRepository {
 
     private final UserMapper userMapper;
 
-    private final FriendMapper friendMapper;
-
     private final FilmRepository filmRepository;
+
+    private final FriendRepository friendRepository;
 
     private static final String SQL_INSERT_USER = "INSERT INTO public.person "
             + "(email, login, name, birthday) VALUES(:email, :login, :name, :birthday)";
@@ -43,12 +43,6 @@ public class UserRepositoryImpl implements UserRepository {
             + "WHERE id = :id";
 
     private static final String SQL_GET_ALL_USERS = "SELECT id, email, login, name, birthday FROM public.person";
-
-    private static final String SQL_GET_FRIENDS_BY_USER_ID = "SELECT friend_id, is_confirmed FROM public.friendship "
-            + "WHERE person_id = :id "
-            + "UNION "
-            + "SELECT person_id, is_confirmed FROM public.friendship "
-            + "WHERE friend_id = :id AND is_confirmed = true";
 
     private static final String SQL_INSERT_FRIEND = "INSERT INTO public.friendship (person_id, friend_id, is_confirmed) "
             + "VALUES (:person_id, :friend_id, :is_confirmed)";
@@ -103,48 +97,32 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public List<User> getAllUsers() {
-        List<User> users = jdbcTemplate.query(SQL_GET_ALL_USERS, userMapper);
-
-        return users.stream()
-                .peek(user -> user.setFriends(getFriendIdsByUserId(user.getId())))
-                .collect(Collectors.toList());
+        return jdbcTemplate.query(SQL_GET_ALL_USERS, userMapper);
     }
 
     @Override
     public Optional<User> getUserById(Integer id) {
-        User user = null;
         var params = new MapSqlParameterSource();
 
         params.addValue("id", id);
-        Optional<User> userOptional = jdbcTemplate.query(SQL_GET_USER_BY_ID, params, userMapper).stream().findFirst();
-
-        if (userOptional.isPresent()) {
-            user = userOptional.get();
-            user.setFriends(getFriendIdsByUserId(id));
-        }
-        return Optional.ofNullable(user);
+        return jdbcTemplate.query(SQL_GET_USER_BY_ID, params, userMapper).stream().findFirst();
     }
 
     @Override
     public User addFriend(Integer userId, Integer friendId) {
-        Set<Friend> friends = getFriendIdsByUserId(userId);
+        Set<Friend> friends = friendRepository.getFriendsByUserId(userId);
         var params = new MapSqlParameterSource();
 
         params.addValue("person_id", userId);
         params.addValue("friend_id", friendId);
         if (friends.stream().anyMatch(friend -> friend.getId().equals(friendId) && !friend.getIsConfirmed())) {
             jdbcTemplate.update(SQL_CONFIRM_FRIENDSHIP, params);
-            friends = getFriendIdsByUserId(userId);
         }
         if (friends.stream().noneMatch(friend -> friend.getId().equals(friendId))) {
             params.addValue("is_confirmed", false);
             jdbcTemplate.update(SQL_INSERT_FRIEND, params);
-            friends = getFriendIdsByUserId(userId);
         }
-        User user = getUserById(userId).orElseThrow(() -> new UserNotFoundException(String.valueOf(userId)));
-
-        user.setFriends(friends);
-        return user;
+        return getUserById(userId).orElseThrow(() -> new UserNotFoundException(String.valueOf(userId)));
     }
 
     @Override
@@ -154,16 +132,12 @@ public class UserRepositoryImpl implements UserRepository {
         params.addValue("person_id", userId);
         params.addValue("friend_id", friendId);
         jdbcTemplate.update(SQL_DELETE_FRIEND, params);
-        Set<Friend> friends = getFriendIdsByUserId(userId);
-        User user = getUserById(userId).orElseThrow(() -> new UserNotFoundException(String.valueOf(userId)));
-
-        user.setFriends(friends);
-        return user;
+        return getUserById(userId).orElseThrow(() -> new UserNotFoundException(String.valueOf(userId)));
     }
 
     @Override
     public List<User> getAllFriends(Integer id) {
-        return getFriendIdsByUserId(id).stream()
+        return friendRepository.getFriendsByUserId(id).stream()
                 .map(friend -> getUserById(friend.getId())
                         .orElseThrow(() -> new UserNotFoundException(String.valueOf(friend.getId()))))
                 .collect(Collectors.toList());
@@ -171,10 +145,10 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public List<User> getCommonFriends(Integer userId, Integer otherId) {
-        Set<Integer> userFriendIds = getFriendIdsByUserId(userId).stream()
+        Set<Integer> userFriendIds = friendRepository.getFriendsByUserId(userId).stream()
                 .map(Friend::getId)
                 .collect(Collectors.toSet());
-        Set<Integer> otherFriendIds = getFriendIdsByUserId(otherId).stream().map(Friend::getId)
+        Set<Integer> otherFriendIds = friendRepository.getFriendsByUserId(otherId).stream().map(Friend::getId)
                 .collect(Collectors.toSet());
         Set<Integer> intersection = new HashSet<>();
 
@@ -225,13 +199,6 @@ public class UserRepositoryImpl implements UserRepository {
             return Optional.empty();
         }
         return Optional.of(ids.get(0));
-    }
-
-    private Set<Friend> getFriendIdsByUserId(Integer id) {
-        var params = new MapSqlParameterSource();
-
-        params.addValue("id", id);
-        return new HashSet<>(jdbcTemplate.query(SQL_GET_FRIENDS_BY_USER_ID, params, friendMapper));
     }
 
     private MapSqlParameterSource getParams(User user) {
