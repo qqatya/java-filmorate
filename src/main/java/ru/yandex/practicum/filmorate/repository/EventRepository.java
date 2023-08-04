@@ -6,7 +6,20 @@ import java.util.List;
 
 public interface EventRepository {
 
-    void addEvent(Event event);
+    /**
+     * Создание события
+     *
+     * @param event Объект, содержащий данные для создания
+     * @return Созданное событие
+     */
+    Event insertEvent(Event event);
 
-    List<Event> getUserFeed(int userId);
+    /**
+     * Получение ленты событий по идентификатору пользователя
+     *
+     * @param id Идентификатор пользователя
+     * @return Список событий
+     */
+    List<Event> getEventsByUserId(Integer id);
+
 }

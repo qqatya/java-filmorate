@@ -11,7 +11,7 @@ import ru.yandex.practicum.filmorate.model.type.EventType;
 import ru.yandex.practicum.filmorate.model.type.OperationType;
 import ru.yandex.practicum.filmorate.repository.FilmRepository;
 import ru.yandex.practicum.filmorate.repository.UserRepository;
-import ru.yandex.practicum.filmorate.repository.impl.EventRepositoryImpl;
+import ru.yandex.practicum.filmorate.service.EventService;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.validation.FilmValidator;
 
@@ -24,7 +24,7 @@ public class FilmServiceImpl implements FilmService {
     private final FilmRepository filmRepository;
     private final UserRepository userRepository;
     private final FilmValidator filmValidator;
-    private final EventRepositoryImpl eventRepositoryImpl;
+    private final EventService eventService;
 
     @Override
     public Film createFilm(Film film) {
@@ -64,8 +64,11 @@ public class FilmServiceImpl implements FilmService {
             throw new UserNotFoundException(String.valueOf(userId));
         }
         log.info("Adding like from userId = {} to filmId = {}", userId, id);
-        eventRepositoryImpl.addEvent(new Event(OperationType.ADD, EventType.LIKE, id, userId));
-        return filmRepository.putLike(id, userId);
+        Film updatedFilm = filmRepository.putLike(id, userId);
+        Event event = eventService.addEvent(new Event(OperationType.ADD, EventType.LIKE, id, userId));
+
+        log.info("Created eventId = {}", event.getEventId());
+        return updatedFilm;
     }
 
     @Override
@@ -77,8 +80,11 @@ public class FilmServiceImpl implements FilmService {
             throw new UserNotFoundException(String.valueOf(userId));
         }
         log.info("Removing like from userId = {} to filmId = {}", userId, id);
-        eventRepositoryImpl.addEvent(new Event(OperationType.REMOVE, EventType.LIKE, id, userId));
-        return filmRepository.deleteLike(id, userId);
+        Film updatedFilm = filmRepository.deleteLike(id, userId);
+        Event event = eventService.addEvent(new Event(OperationType.REMOVE, EventType.LIKE, id, userId));
+
+        log.info("Created eventId = {}", event.getEventId());
+        return updatedFilm;
 
     }
 

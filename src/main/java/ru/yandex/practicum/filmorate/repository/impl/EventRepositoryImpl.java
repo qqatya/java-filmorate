@@ -2,75 +2,75 @@ package ru.yandex.practicum.filmorate.repository.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.exception.EventNotFoundException;
+import ru.yandex.practicum.filmorate.mapper.EventMapper;
 import ru.yandex.practicum.filmorate.model.Event;
-import ru.yandex.practicum.filmorate.model.type.EventType;
-import ru.yandex.practicum.filmorate.model.type.OperationType;
 import ru.yandex.practicum.filmorate.repository.EventRepository;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
 
-@Component
 @Slf4j
 @RequiredArgsConstructor
 @Repository
 public class EventRepositoryImpl implements EventRepository {
+
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
+    private final EventMapper eventMapper;
+
+    private static final String SQL_INSERT_EVENT = "INSERT INTO public.event "
+            + "(operation, timestamp, type, person_id, entity_id) "
+            + "VALUES(:operation, :timestamp, :type, :person_id, :entity_id)";
+
+    private static final String SQL_GET_EVENT_BY_ID = "SELECT id, timestamp, operation, type, person_id, entity_id "
+            + "FROM public.event WHERE id = :id";
+
+    private static final String SQL_GET_EVENTS_BY_USER_ID = "SELECT id, timestamp, operation, type, person_id, "
+            + "entity_id FROM public.event WHERE id = :id";
+
     @Override
-    public void addEvent(Event event) {
-        log.trace("Level: Repository. Class EventRepositoryImpl. Call of addEvent method");
-        MapSqlParameterSource values = new MapSqlParameterSource();
-        values.addValue("event_timestamp", Timestamp.from(Instant.ofEpochMilli(event.getTimestamp())));
-        values.addValue("event_type", event.getEventType());
-        values.addValue("operation", event.getOperationType());
-        values.addValue("entity_id", event.getEntityId());
-        values.addValue("user_id", event.getUserId());
+    public Event insertEvent(Event event) {
+        MapSqlParameterSource params = getParams(event);
 
-        String insertSql = "INSERT INTO events_log (event_timestamp, event_type, operation, entity_id, user_id) "
-                + "VALUES (:event_timestamp, :event_type, :operation, :entity_id, :user_id)";
-        KeyHolder keyHolder = new GeneratedKeyHolder();
+        KeyHolder holder = new GeneratedKeyHolder();
 
-        try {
-            jdbcTemplate.update(insertSql, values, keyHolder);
-            int id = Objects.requireNonNull(keyHolder.getKey()).intValue();
-            if (id > 0) {
-                event.setEventId(id);
-            } else {
-                throw new ValidationException("Событие в журнал не добавлено. Ошибка валидации записи");
-            }
-        } catch (DataAccessException e) {
-            throw new ValidationException("Не удалось добавить событие в журнал. Причина: " + e.getMessage());
-        }
+        jdbcTemplate.update(SQL_INSERT_EVENT, params, holder);
+        Integer eventId = holder.getKey().intValue();
+
+        return getEventById(eventId).orElseThrow(() -> new EventNotFoundException(String.valueOf(eventId)));
     }
 
     @Override
-    public List<Event> getUserFeed(int userId) {
-        log.trace("Layer: Repository. Class EventRepositoryImpl. Call of getUserFeed");
-        String sql = "SELECT * FROM events_log WHERE user_id = :user_id";
-        MapSqlParameterSource params = new MapSqlParameterSource("user_id", userId);
-        return Collections.singletonList(jdbcTemplate.query(sql, params, this::makeEvent));
+    public List<Event> getEventsByUserId(Integer id) {
+        var params = new MapSqlParameterSource();
+
+        params.addValue("id", id);
+        return jdbcTemplate.query(SQL_GET_EVENTS_BY_USER_ID, params, eventMapper);
     }
 
-    private Event makeEvent(ResultSet rs) throws SQLException {
-        return new Event(
-                rs.getInt("id"),
-                rs.getTimestamp("event_timestamp").toInstant().toEpochMilli(),
-                OperationType.valueOf(rs.getString("operation")),
-                EventType.valueOf(rs.getString("event_type")),
-                rs.getInt("entity_id"),
-                rs.getInt("user_id")
-        );
+    private Optional<Event> getEventById(Integer id) {
+        var params = new MapSqlParameterSource();
+
+        params.addValue("id", id);
+        return jdbcTemplate.query(SQL_GET_EVENT_BY_ID, params, eventMapper).stream().findFirst();
+
+
+    }
+
+    private MapSqlParameterSource getParams(Event event) {
+        var params = new MapSqlParameterSource();
+
+        params.addValue("timestamp", event.getTimestamp());
+        params.addValue("operation", event.getOperationType().toString());
+        params.addValue("type", event.getEventType().toString());
+        params.addValue("person_id", event.getUserId());
+        params.addValue("entity_id", event.getEntityId());
+        return params;
     }
 }

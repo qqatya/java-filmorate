@@ -11,7 +11,7 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.model.type.EventType;
 import ru.yandex.practicum.filmorate.model.type.OperationType;
 import ru.yandex.practicum.filmorate.repository.UserRepository;
-import ru.yandex.practicum.filmorate.repository.impl.EventRepositoryImpl;
+import ru.yandex.practicum.filmorate.service.EventService;
 import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.validation.UserValidator;
 
@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserValidator userValidator;
-    private final EventRepositoryImpl eventRepositoryImpl;
+    private final EventService eventService;
 
     @Override
     public User createUser(User user) {
@@ -66,8 +66,11 @@ public class UserServiceImpl implements UserService {
             throw new UserNotFoundException(String.valueOf(friendId));
         }
         log.info("Adding userId = {} to friends of userId = {}", friendId, userId);
-        eventRepositoryImpl.addEvent(new Event(OperationType.ADD, EventType.FRIEND, userId, friendId));
-        return userRepository.addFriend(userId, friendId);
+        User updatedUser = userRepository.addFriend(userId, friendId);
+        Event event = eventService.addEvent(new Event(OperationType.ADD, EventType.FRIEND, userId, friendId));
+
+        log.info("Created eventId = {}", event.getEventId());
+        return updatedUser;
     }
 
     @Override
@@ -86,8 +89,11 @@ public class UserServiceImpl implements UserService {
 
         if (friendIds.contains(friendId)) {
             log.info("Deleting userId = {} from friends of userId = {}", friendId, userId);
-            eventRepositoryImpl.addEvent(new Event(OperationType.REMOVE, EventType.FRIEND, userId, friendId));
-            return userRepository.deleteFriend(userId, friendId);
+            User updatedUser = userRepository.deleteFriend(userId, friendId);
+            Event event = eventService.addEvent(new Event(OperationType.REMOVE, EventType.FRIEND, userId, friendId));
+
+            log.info("Created eventId = {}", event.getEventId());
+            return updatedUser;
         }
 
         throw new ValidationException(

@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.repository.impl.EventRepositoryImpl;
+import ru.yandex.practicum.filmorate.service.EventService;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
@@ -15,7 +15,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
-    private final EventRepositoryImpl eventRepository;
+
+    private final EventService eventService;
 
     /**
      * Создание пользователя
@@ -99,7 +100,8 @@ public class UserController {
 
     /**
      * Получение списка общих друзей двух пользователей
-     * @param userId Идентификатор пользователя
+     *
+     * @param userId  Идентификатор пользователя
      * @param otherId Идентификатор пользователя
      * @return Список общих друзей
      */
@@ -109,8 +111,14 @@ public class UserController {
         return userService.getCommonFriends(userId, otherId);
     }
 
+    /**
+     * Получение ленты событий по идентификатору пользователя
+     *
+     * @param id Идентификатор пользователя
+     * @return Список событий
+     */
     @GetMapping("{id}/feed")
-    public List<Event> getUsersFeed(@PathVariable Integer id) {
-        return eventRepository.getUserFeed(id);
+    public List<Event> getFeedByUserId(@PathVariable Integer id) {
+        return eventService.getFeedByUserId(id);
     }
 }
