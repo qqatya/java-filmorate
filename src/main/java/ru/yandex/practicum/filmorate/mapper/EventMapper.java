@@ -2,10 +2,10 @@ package ru.yandex.practicum.filmorate.mapper;
 
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Event;
-import ru.yandex.practicum.filmorate.model.eventenum.Entity;
-import ru.yandex.practicum.filmorate.model.eventenum.Operation;
+import ru.yandex.practicum.filmorate.model.type.EventType;
+import ru.yandex.practicum.filmorate.model.type.OperationType;
 
-import javax.swing.tree.RowMapper;
+import org.springframework.jdbc.core.RowMapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -18,8 +18,8 @@ public class EventMapper implements RowMapper<Event> {
                 .timestamp(rs.getLong("timestamp"))
                 .entityId(rs.getInt("entityId"))
                 .userId(rs.getInt("userId"))
-                .operation(Operation.valueOf(rs.getString("operation")))
-                .eventType(Entity.valueOf(rs.getString("eventType")))
+                .operationType(OperationType.valueOf(rs.getString("operation")))
+                .eventType(EventType.valueOf(rs.getString("eventType")))
                 .build();
     }
 }

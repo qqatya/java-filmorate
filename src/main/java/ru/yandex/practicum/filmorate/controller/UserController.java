@@ -15,6 +15,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
+    private final EventRepositoryImpl eventRepository;
 
     /**
      * Создание пользователя
@@ -106,5 +107,10 @@ public class UserController {
     public List<User> getCommonFriends(@PathVariable("id") Integer userId,
                                        @PathVariable Integer otherId) {
         return userService.getCommonFriends(userId, otherId);
+    }
+
+    @GetMapping("{id}/feed")
+    public List<Event> getUsersFeed(@PathVariable Integer id) {
+        return eventRepository.getUserFeed(id);
     }
 }

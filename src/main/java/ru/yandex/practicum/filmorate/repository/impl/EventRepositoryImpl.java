@@ -11,8 +11,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Event;
-import ru.yandex.practicum.filmorate.model.eventenum.Entity;
-import ru.yandex.practicum.filmorate.model.eventenum.Operation;
+import ru.yandex.practicum.filmorate.model.type.EventType;
+import ru.yandex.practicum.filmorate.model.type.OperationType;
 import ru.yandex.practicum.filmorate.repository.EventRepository;
 
 import java.sql.ResultSet;
@@ -34,7 +34,7 @@ public class EventRepositoryImpl implements EventRepository {
         MapSqlParameterSource values = new MapSqlParameterSource();
         values.addValue("event_timestamp", Timestamp.from(Instant.ofEpochMilli(event.getTimestamp())));
         values.addValue("event_type", event.getEventType());
-        values.addValue("operation", event.getOperation());
+        values.addValue("operation", event.getOperationType());
         values.addValue("entity_id", event.getEntityId());
         values.addValue("user_id", event.getUserId());
 
@@ -56,7 +56,7 @@ public class EventRepositoryImpl implements EventRepository {
     }
 
     @Override
-    public List<Event> getUsersFeed(int userId) {
+    public List<Event> getUserFeed(int userId) {
         log.trace("Layer: Repository. Class EventRepositoryImpl. Call of getUserFeed");
         String sql = "SELECT * FROM events_log WHERE user_id = :user_id";
         MapSqlParameterSource params = new MapSqlParameterSource("user_id", userId);
@@ -67,8 +67,8 @@ public class EventRepositoryImpl implements EventRepository {
         return new Event(
                 rs.getInt("id"),
                 rs.getTimestamp("event_timestamp").toInstant().toEpochMilli(),
-                Operation.valueOf(rs.getString("operation")),
-                Entity.valueOf(rs.getString("event_type")),
+                OperationType.valueOf(rs.getString("operation")),
+                EventType.valueOf(rs.getString("event_type")),
                 rs.getInt("entity_id"),
                 rs.getInt("user_id")
         );

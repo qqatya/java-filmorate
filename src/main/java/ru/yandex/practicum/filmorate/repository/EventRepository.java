@@ -8,5 +8,5 @@ public interface EventRepository {
 
     void addEvent(Event event);
 
-    List<Event> getUsersFeed(int userId);
+    List<Event> getUserFeed(int userId);
 }

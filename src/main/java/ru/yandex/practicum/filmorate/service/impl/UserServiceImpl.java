@@ -8,11 +8,10 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.Friend;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.model.eventenum.Entity;
-import ru.yandex.practicum.filmorate.model.eventenum.Operation;
+import ru.yandex.practicum.filmorate.model.type.EventType;
+import ru.yandex.practicum.filmorate.model.type.OperationType;
 import ru.yandex.practicum.filmorate.repository.UserRepository;
 import ru.yandex.practicum.filmorate.repository.impl.EventRepositoryImpl;
-import ru.yandex.practicum.filmorate.repository.impl.UserRepositoryImpl;
 import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.validation.UserValidator;
 
@@ -67,7 +66,7 @@ public class UserServiceImpl implements UserService {
             throw new UserNotFoundException(String.valueOf(friendId));
         }
         log.info("Adding userId = {} to friends of userId = {}", friendId, userId);
-        eventRepositoryImpl.addEvent(new Event(Operation.ADD, Entity.FRIEND, userId, friendId));
+        eventRepositoryImpl.addEvent(new Event(OperationType.ADD, EventType.FRIEND, userId, friendId));
         return userRepository.addFriend(userId, friendId);
     }
 
@@ -87,7 +86,7 @@ public class UserServiceImpl implements UserService {
 
         if (friendIds.contains(friendId)) {
             log.info("Deleting userId = {} from friends of userId = {}", friendId, userId);
-            eventRepositoryImpl.addEvent(new Event(Operation.REMOVE, Entity.FRIEND, userId, friendId));
+            eventRepositoryImpl.addEvent(new Event(OperationType.REMOVE, EventType.FRIEND, userId, friendId));
             return userRepository.deleteFriend(userId, friendId);
         }
 

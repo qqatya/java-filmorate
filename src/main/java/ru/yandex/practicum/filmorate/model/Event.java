@@ -1,10 +1,10 @@
 package ru.yandex.practicum.filmorate.model;
 
 import lombok.*;
-import ru.yandex.practicum.filmorate.model.eventenum.Entity;
-import ru.yandex.practicum.filmorate.model.eventenum.Operation;
+import ru.yandex.practicum.filmorate.model.type.EventType;
+import ru.yandex.practicum.filmorate.model.type.OperationType;
 
-import javax.validation.ValidationException;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import java.time.Instant;
 
@@ -14,39 +14,32 @@ import java.time.Instant;
 @NoArgsConstructor
 public class Event {
     private Integer eventId;
-    @NonNull
+    @NotNull
     private Long timestamp;
     @Positive
-    @NonNull
+    @NotNull
     private Integer entityId;
     @Positive
-    @NonNull
+    @NotNull
     private Integer userId;
-    @NonNull
-    private Operation operation;
-    @NonNull
-    private Entity eventType;
+    @NotNull
+    private OperationType operationType;
+    @NotNull
+    private EventType eventType;
 
-    public Event(int id, long eventTimestamp, Operation operation, Entity entity, int userId, int entityId) {
-        if (userId <= 0) {
-            throw new ValidationException("userId должен быть больше 0");
-        }
-        if (entityId <= 0) {
-            throw new ValidationException("Сущность не может быть меньше или равна 0");
-        }
-        if (operation == null) {
-            throw new ValidationException("Не может быть не совершена никакая операция");
-        }
-        if (entity == null) {
-            throw new ValidationException("Должно произойти одно из событий: Лайк, Отзыв, Действие с другом");
-        }
+    public Event(Integer id, Long eventTimestamp, OperationType operationType, EventType eventType, Integer userId, Integer entityId) {
         this.timestamp = Instant.now().toEpochMilli();
-        this.operation = operation;
-        this.eventType = entity;
+        this.operationType = operationType;
+        this.eventType = eventType;
         this.entityId = entityId;
         this.userId = userId;
     }
 
-    public Event(Operation operation, Entity entity, Integer id, Integer userId) {
+    public Event(OperationType operationType, EventType eventType, Integer id, Integer userId) {
+        this.timestamp = Instant.now().toEpochMilli();
+        this.operationType = operationType;
+        this.eventType = eventType;
+        this.entityId = entityId;
+        this.userId = userId;
     }
 }
