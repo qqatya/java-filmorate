@@ -36,7 +36,7 @@ public class FilmMapper implements RowMapper<Film> {
                 .duration(rs.getLong("duration"))
                 .usersLiked(userLikeRepository.getUsersLikedByFilmId(filmId))
                 .mpa(ratingRepository.getByFilmId(filmId).orElse(null))
-                .genres(genreRepository.getByFilmId(rs.getInt("id")))
+                .genres(genreRepository.getByFilmId(filmId))
                 .directors(directorRepository.getByFilmId(filmId))
                 .build();
     }
