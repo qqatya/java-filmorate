@@ -8,7 +8,7 @@ import ru.yandex.practicum.filmorate.model.type.EventType;
 import ru.yandex.practicum.filmorate.model.type.OperationType;
 
 import javax.validation.constraints.NotNull;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Data
 @Builder
@@ -19,7 +19,7 @@ public class Event {
     private Integer eventId;
 
     @NotNull
-    private LocalDateTime timestamp;
+    private Long timestamp;
 
     @NotNull
     private Integer entityId;
@@ -31,22 +31,12 @@ public class Event {
     private OperationType operationType;
 
     @NotNull
-    private EventType eventType;
+    private EventType event;
 
-    public Event(Integer eventId, OperationType operationType,
-                 EventType eventType, Integer userId, Integer entityId) {
-        this.eventId = eventId;
-        this.timestamp = LocalDateTime.now();
+    public Event(OperationType operationType, EventType event, Integer userId, Integer entityId) {
+        this.timestamp = Instant.now().toEpochMilli();
         this.operationType = operationType;
-        this.eventType = eventType;
-        this.entityId = entityId;
-        this.userId = userId;
-    }
-
-    public Event(OperationType operationType, EventType eventType, Integer userId, Integer entityId) {
-        this.timestamp = LocalDateTime.now();
-        this.operationType = operationType;
-        this.eventType = eventType;
+        this.event = event;
         this.entityId = entityId;
         this.userId = userId;
     }

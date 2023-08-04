@@ -68,7 +68,7 @@ public class EventRepositoryImpl implements EventRepository {
 
         params.addValue("timestamp", event.getTimestamp());
         params.addValue("operation", event.getOperationType().toString());
-        params.addValue("type", event.getEventType().toString());
+        params.addValue("type", event.getEvent().toString());
         params.addValue("person_id", event.getUserId());
         params.addValue("entity_id", event.getEntityId());
         return params;
