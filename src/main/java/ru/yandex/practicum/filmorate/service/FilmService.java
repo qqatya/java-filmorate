@@ -55,10 +55,46 @@ public interface FilmService {
     Film deleteLike(Integer id, Integer userId);
 
     /**
-     * Получение фильмов по маскимальному количеству лайков
+     * Получение топ-N фильмов по количеству лайков с возможностью фильтрации по жанру и году выпуска
      *
-     * @param count Количество фильмов
+     * @param count   Количество фильмов
+     * @param genreId Идентификатор жанра
+     * @param year    год выпуска
      * @return Список фильмов
      */
-    List<Film> getPopularFilms(Integer count);
+    List<Film> getPopularFilms(Integer count, Integer genreId, Integer year);
+
+    /**
+     * Вывод общих с другом фильмов с сортировкой по их популярности
+     *
+     * @param userId   Идентификатор пользователя, запрашивающего информацию
+     * @param friendId Идентификатор пользователя, с которым необходимо сравнить список фильмов
+     * @return Список фильмов, отсортированных по популярности
+     */
+    List<Film> getCommonFilms(Integer userId, Integer friendId);
+
+    /**
+     * Удаление фильма по идентификатору
+     *
+     * @param id Идентификатор фильма
+     */
+    void deleteFilmById(Integer id);
+
+    /**
+     * Получение всех фильмов режиссера, отсортированных по количеству лайков или году выпуска
+     *
+     * @param directorId Идентификатор режиссёра
+     * @param sortBy     Параметр сортировки
+     * @return Список фильмов
+     */
+    List<Film> getFilmsByDirectorIdSorted(Integer directorId, String sortBy);
+
+    /**
+     * Получение списка фильмов по парамметрам поиска
+     *
+     * @param query Текст для поиска
+     * @param by    Параметр поиска: по режиссёру/по названию/по режиссеру и по названию
+     * @return Список фильмов, отсортированных по популярности
+     */
+    List<Film> searchFilms(String query, String by);
 }

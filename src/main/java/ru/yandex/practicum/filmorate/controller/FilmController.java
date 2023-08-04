@@ -64,7 +64,7 @@ public class FilmController {
      * @param userId Идентификатор пользователя
      * @return Фильм с обновленным списком лайков
      */
-    @PutMapping("{id}/like/{userId}")
+    @PutMapping("/{id}/like/{userId}")
     public Film putLike(@PathVariable Integer id,
                         @PathVariable Integer userId) {
         return filmService.putLike(id, userId);
@@ -84,13 +84,65 @@ public class FilmController {
     }
 
     /**
-     * Получение фильмов по маскимальному количеству лайков
+     * Получение топ-N фильмов по количеству лайков с возможностью фильтрации по жанру и году выпуска
      *
-     * @param count Количество фильмов
+     * @param count   Количество фильмов
+     * @param genreId Идентификатор жанра
+     * @param year    год выпуска
      * @return Список фильмов
      */
     @GetMapping("/popular")
-    public List<Film> getPopularFilms(@RequestParam(defaultValue = "10") Integer count) {
-        return filmService.getPopularFilms(count);
+    public List<Film> getPopularFilms(@RequestParam(defaultValue = "10") Integer count,
+                                      @RequestParam(required = false) Integer genreId,
+                                      @RequestParam(required = false) Integer year) {
+        return filmService.getPopularFilms(count, genreId, year);
+    }
+
+    /**
+     * Вывод общих с другом фильмов с сортировкой по их популярности
+     *
+     * @param userId   Идентификатор пользователя, запрашивающего информацию
+     * @param friendId Идентификатор пользователя, с которым необходимо сравнить список фильмов
+     * @return Список фильмов, отсортированных по популярности
+     */
+    @GetMapping("/common")
+    public List<Film> getCommonFilms(@RequestParam Integer userId, @RequestParam Integer friendId) {
+        return filmService.getCommonFilms(userId, friendId);
+    }
+
+    /**
+     * Удаление фильма по идентификатору
+     *
+     * @param id Идентификатор фильма
+     */
+    @DeleteMapping("/{id}")
+    public void deleteFilmById(@PathVariable Integer id) {
+        filmService.deleteFilmById(id);
+    }
+
+    /**
+     * Получение всех фильмов режиссера, отсортированных по количеству лайков или году выпуска
+     *
+     * @param directorId Идентификатор режиссёра
+     * @param sortBy     Параметр сортировки, по умолчанию "likes"
+     * @return Список фильмов режиссера
+     */
+    @GetMapping("/director/{directorId}")
+    public List<Film> getFilmsByDirectorIdSorted(@PathVariable int directorId,
+                                                 @RequestParam(defaultValue = "likes") String sortBy) {
+        return filmService.getFilmsByDirectorIdSorted(directorId, sortBy);
+    }
+
+    /**
+     * Получение списка фильмов по парамметрам поиска
+     *
+     * @param query Текст для поиска
+     * @param by    Параметр поиска: по режиссёру/по названию/по режиссеру и по названию
+     * @return Список фильмов, отсортированных по популярности
+     */
+    @GetMapping("/search")
+    public List<Film> searchFilms(@RequestParam(required = false) String query,
+                                  @RequestParam(required = false) String by) {
+        return filmService.searchFilms(query, by);
     }
 }
