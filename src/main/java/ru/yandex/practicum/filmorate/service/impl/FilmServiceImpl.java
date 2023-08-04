@@ -8,9 +8,9 @@ import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.repository.DirectorRepository;
 import ru.yandex.practicum.filmorate.model.type.EventType;
-import ru.yandex.practicum.filmorate.model.type.OperationType;
+import ru.yandex.practicum.filmorate.model.type.Operation;
+import ru.yandex.practicum.filmorate.repository.DirectorRepository;
 import ru.yandex.practicum.filmorate.repository.FilmRepository;
 import ru.yandex.practicum.filmorate.repository.UserRepository;
 import ru.yandex.practicum.filmorate.service.EventService;
@@ -68,7 +68,7 @@ public class FilmServiceImpl implements FilmService {
         }
         log.info("Adding like from userId = {} to filmId = {}", userId, id);
         Film updatedFilm = filmRepository.putLike(id, userId);
-        Event event = eventService.addEvent(new Event(OperationType.ADD, EventType.LIKE, id, userId));
+        Event event = eventService.addEvent(new Event(userId, EventType.LIKE, Operation.ADD, id));
 
         log.info("Created eventId = {}", event.getEventId());
         return updatedFilm;
@@ -84,7 +84,7 @@ public class FilmServiceImpl implements FilmService {
         }
         log.info("Removing like from userId = {} to filmId = {}", userId, id);
         Film updatedFilm = filmRepository.deleteLike(id, userId);
-        Event event = eventService.addEvent(new Event(OperationType.REMOVE, EventType.LIKE, id, userId));
+        Event event = eventService.addEvent(new Event(userId, EventType.LIKE, Operation.REMOVE, id));
 
         log.info("Created eventId = {}", event.getEventId());
         return updatedFilm;

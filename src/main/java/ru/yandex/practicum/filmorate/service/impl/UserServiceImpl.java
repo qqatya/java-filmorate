@@ -5,12 +5,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
-import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Event;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Friend;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.model.type.EventType;
-import ru.yandex.practicum.filmorate.model.type.OperationType;
+import ru.yandex.practicum.filmorate.model.type.Operation;
 import ru.yandex.practicum.filmorate.repository.UserRepository;
 import ru.yandex.practicum.filmorate.service.EventService;
 import ru.yandex.practicum.filmorate.service.UserService;
@@ -68,7 +68,7 @@ public class UserServiceImpl implements UserService {
         }
         log.info("Adding userId = {} to friends of userId = {}", friendId, userId);
         User updatedUser = userRepository.addFriend(userId, friendId);
-        Event event = eventService.addEvent(new Event(OperationType.ADD, EventType.FRIEND, userId, friendId));
+        Event event = eventService.addEvent(new Event(userId, EventType.FRIEND, Operation.ADD, friendId));
 
         log.info("Created eventId = {}", event.getEventId());
         return updatedUser;
@@ -91,7 +91,7 @@ public class UserServiceImpl implements UserService {
         if (friendIds.contains(friendId)) {
             log.info("Deleting userId = {} from friends of userId = {}", friendId, userId);
             User updatedUser = userRepository.deleteFriend(userId, friendId);
-            Event event = eventService.addEvent(new Event(OperationType.REMOVE, EventType.FRIEND, userId, friendId));
+            Event event = eventService.addEvent(new Event(userId, EventType.FRIEND, Operation.REMOVE, friendId));
 
             log.info("Created eventId = {}", event.getEventId());
             return updatedUser;

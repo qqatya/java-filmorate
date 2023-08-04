@@ -65,11 +65,10 @@ public class EventRepositoryImpl implements EventRepository {
 
     private MapSqlParameterSource getParams(Event event) {
         var params = new MapSqlParameterSource();
-
         params.addValue("timestamp", event.getTimestamp());
-        params.addValue("operation", event.getOperationType().toString());
-        params.addValue("type", event.getEvent().toString());
         params.addValue("person_id", event.getUserId());
+        params.addValue("type", event.getEventType().toString());
+        params.addValue("operation", event.getOperation().toString());
         params.addValue("entity_id", event.getEntityId());
         return params;
     }

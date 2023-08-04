@@ -7,7 +7,7 @@ import ru.yandex.practicum.filmorate.exception.*;
 import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.model.type.EventType;
-import ru.yandex.practicum.filmorate.model.type.OperationType;
+import ru.yandex.practicum.filmorate.model.type.Operation;
 import ru.yandex.practicum.filmorate.repository.FilmRepository;
 import ru.yandex.practicum.filmorate.repository.ReviewRepository;
 import ru.yandex.practicum.filmorate.repository.UserRepository;
@@ -38,8 +38,8 @@ public class ReviewServiceImpl implements ReviewService {
             throw new UserNotFoundException(String.valueOf(review.getUserId()));
         }
         Review createdReview = reviewRepository.insertReview(review);
-        Event event = eventService.addEvent(new Event(OperationType.ADD, EventType.REVIEW,
-                createdReview.getUserId(), createdReview.getReviewId()));
+        Event event = eventService.addEvent(new Event(createdReview.getUserId(), EventType.REVIEW, Operation.ADD,
+                createdReview.getReviewId()));
 
         log.info("Created eventId = {}", event.getEventId());
         return createdReview;
@@ -57,8 +57,8 @@ public class ReviewServiceImpl implements ReviewService {
 
             log.info("Updating reviewId = {}", review.getReviewId());
             Review updatedReview = reviewRepository.updateReview(review);
-            Event event = eventService.addEvent(new Event(OperationType.UPDATE, EventType.REVIEW,
-                    updatedReview.getUserId(), updatedReview.getReviewId()));
+            Event event = eventService.addEvent(new Event(updatedReview.getUserId(), EventType.REVIEW, Operation.UPDATE,
+                    updatedReview.getReviewId()));
 
             log.info("Created eventId = {}", event.getEventId());
             return updatedReview;
@@ -83,8 +83,8 @@ public class ReviewServiceImpl implements ReviewService {
 
         log.info("Deleting reviewId = {}", id);
         reviewRepository.deleteReviewById(id);
-        Event event = eventService.addEvent(new Event(OperationType.REMOVE, EventType.REVIEW,
-                review.getUserId(), review.getReviewId()));
+        Event event = eventService.addEvent(new Event(review.getUserId(), EventType.REVIEW, Operation.REMOVE,
+                review.getReviewId()));
 
         log.info("Created eventId = {}", event.getEventId());
     }

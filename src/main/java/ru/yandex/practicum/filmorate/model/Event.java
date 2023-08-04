@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.yandex.practicum.filmorate.model.type.EventType;
-import ru.yandex.practicum.filmorate.model.type.OperationType;
+import ru.yandex.practicum.filmorate.model.type.Operation;
 
 import javax.validation.constraints.NotNull;
 import java.time.Instant;
@@ -28,15 +28,15 @@ public class Event {
     private Integer userId;
 
     @NotNull
-    private OperationType operationType;
+    private Operation operation;
 
     @NotNull
-    private EventType event;
+    private EventType eventType;
 
-    public Event(OperationType operationType, EventType event, Integer userId, Integer entityId) {
+    public Event(Integer userId, EventType eventType, Operation operation, Integer entityId) {
         this.timestamp = Instant.now().toEpochMilli();
-        this.operationType = operationType;
-        this.event = event;
+        this.operation = operation;
+        this.eventType = eventType;
         this.entityId = entityId;
         this.userId = userId;
     }

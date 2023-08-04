@@ -1,5 +1,5 @@
 package ru.yandex.practicum.filmorate.model.type;
 
-public enum OperationType {
+public enum Operation {
     REMOVE, ADD, UPDATE
 }
