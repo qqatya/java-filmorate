@@ -1,8 +1,8 @@
-package ru.yandex.practicum.filmorate.model;
+package ru.yandex.practicum.filmorate.model.type;
 
-import ru.yandex.practicum.filmorate.exception.TypeNotFoundException;
+import ru.yandex.practicum.filmorate.exception.SearchTypeNotFoundException;
 
-public enum Type {
+public enum SearchType {
     DIRECTOR("director"),
     TITLE("title"),
     TITLE_DIRECTOR("title,director"),
@@ -10,18 +10,18 @@ public enum Type {
 
     private final String type;
 
-    Type(String type) {
+    SearchType(String type) {
         this.type = type;
     }
 
-    public static Type of(String code) {
+    public static SearchType of(String code) {
         if (code != null) {
-            for (Type type : Type.values()) {
+            for (SearchType type : SearchType.values()) {
                 if (type.type.equals(code)) {
                     return type;
                 }
             }
         }
-        throw new TypeNotFoundException(code);
+        throw new SearchTypeNotFoundException(code);
     }
 }

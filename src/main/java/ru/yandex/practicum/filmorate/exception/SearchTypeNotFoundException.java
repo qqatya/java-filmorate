@@ -1,7 +1,7 @@
 package ru.yandex.practicum.filmorate.exception;
 
-public class TypeNotFoundException extends RuntimeException {
-    public TypeNotFoundException(String message) {
+public class SearchTypeNotFoundException extends RuntimeException {
+    public SearchTypeNotFoundException(String message) {
         super("Тип запроса со значением: " + message + " не найден");
     }
 }

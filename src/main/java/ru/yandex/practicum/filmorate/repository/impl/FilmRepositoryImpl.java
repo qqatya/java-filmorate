@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Type;
+import ru.yandex.practicum.filmorate.model.type.SearchType;
 import ru.yandex.practicum.filmorate.repository.DirectorRepository;
 import ru.yandex.practicum.filmorate.repository.FilmRepository;
 import ru.yandex.practicum.filmorate.repository.GenreRepository;
@@ -91,12 +91,6 @@ public class FilmRepositoryImpl implements FilmRepository {
             "GROUP BY f.id " +
             "ORDER BY COUNT(fl.liked_person_id) DESC " +
             "LIMIT :count ";
-
-    private static final String SQL_GET_FILMS_SEARCH_ALL = "SELECT film.* " +
-            "FROM film " +
-            "LEFT JOIN film_like AS fl ON film.id = fl.film_id " +
-            "GROUP BY film.id " +
-            "ORDER BY COUNT(fl.liked_person_id) DESC";
 
     private static final String SQL_GET_FILMS_SEARCH_IN_TITLE = "SELECT film.id, film.name, film.description, " +
             "film.release_date, film.duration, film.rating_id " +
@@ -250,16 +244,17 @@ public class FilmRepositoryImpl implements FilmRepository {
     public List<Film> searchFilms(String query, String by) {
         var params = new MapSqlParameterSource();
         params.addValue("query", query.toLowerCase());
-        Type type = Type.of(by);
+        SearchType type = SearchType.of(by);
         switch (type) {
             case DIRECTOR:
                 return jdbcTemplate.query(SQL_GET_FILMS_SEARCH_IN_DIRECTOR, params, filmMapper);
             case TITLE:
                 return jdbcTemplate.query(SQL_GET_FILMS_SEARCH_IN_TITLE, params, filmMapper);
-            case TITLE_DIRECTOR: case DIRECTOR_TITLE:
+            case TITLE_DIRECTOR:
+            case DIRECTOR_TITLE:
                 return jdbcTemplate.query(SQL_GET_FILMS_SEARCH_IN_DIRECTOR_AND_TITLE, params, filmMapper);
             default:
-                return jdbcTemplate.query(SQL_GET_FILMS_SEARCH_ALL, params, filmMapper);
+                return jdbcTemplate.query(SQL_POPULAR_FILMS, params, filmMapper);
         }
     }
 
