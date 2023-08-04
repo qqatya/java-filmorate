@@ -6,10 +6,14 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.DirectorNotFoundException;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
+import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.type.EventType;
+import ru.yandex.practicum.filmorate.model.type.Operation;
 import ru.yandex.practicum.filmorate.repository.DirectorRepository;
 import ru.yandex.practicum.filmorate.repository.FilmRepository;
 import ru.yandex.practicum.filmorate.repository.UserRepository;
+import ru.yandex.practicum.filmorate.service.EventService;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.validation.FilmValidator;
 
@@ -23,6 +27,7 @@ public class FilmServiceImpl implements FilmService {
     private final UserRepository userRepository;
     private final DirectorRepository directorRepository;
     private final FilmValidator filmValidator;
+    private final EventService eventService;
 
     @Override
     public Film createFilm(Film film) {
@@ -62,7 +67,11 @@ public class FilmServiceImpl implements FilmService {
             throw new UserNotFoundException(String.valueOf(userId));
         }
         log.info("Adding like from userId = {} to filmId = {}", userId, id);
-        return filmRepository.putLike(id, userId);
+        Film updatedFilm = filmRepository.putLike(id, userId);
+        Event event = eventService.addEvent(new Event(userId, EventType.LIKE, Operation.ADD, id));
+
+        log.info("Created eventId = {}", event.getEventId());
+        return updatedFilm;
     }
 
     @Override
@@ -74,7 +83,12 @@ public class FilmServiceImpl implements FilmService {
             throw new UserNotFoundException(String.valueOf(userId));
         }
         log.info("Removing like from userId = {} to filmId = {}", userId, id);
-        return filmRepository.deleteLike(id, userId);
+        Film updatedFilm = filmRepository.deleteLike(id, userId);
+        Event event = eventService.addEvent(new Event(userId, EventType.LIKE, Operation.REMOVE, id));
+
+        log.info("Created eventId = {}", event.getEventId());
+        return updatedFilm;
+
     }
 
     @Override

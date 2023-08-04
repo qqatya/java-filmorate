@@ -4,10 +4,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.*;
+import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.Review;
+import ru.yandex.practicum.filmorate.model.type.EventType;
+import ru.yandex.practicum.filmorate.model.type.Operation;
 import ru.yandex.practicum.filmorate.repository.FilmRepository;
 import ru.yandex.practicum.filmorate.repository.ReviewRepository;
 import ru.yandex.practicum.filmorate.repository.UserRepository;
+import ru.yandex.practicum.filmorate.service.EventService;
 import ru.yandex.practicum.filmorate.service.ReviewService;
 
 import java.util.List;
@@ -23,6 +27,8 @@ public class ReviewServiceImpl implements ReviewService {
 
     private final UserRepository userRepository;
 
+    private final EventService eventService;
+
     @Override
     public Review createReview(Review review) {
         if (!filmRepository.doesExist(review.getFilmId())) {
@@ -31,7 +37,12 @@ public class ReviewServiceImpl implements ReviewService {
         if (!userRepository.doesExist(review.getUserId())) {
             throw new UserNotFoundException(String.valueOf(review.getUserId()));
         }
-        return reviewRepository.insertReview(review);
+        Review createdReview = reviewRepository.insertReview(review);
+        Event event = eventService.addEvent(new Event(createdReview.getUserId(), EventType.REVIEW, Operation.ADD,
+                createdReview.getReviewId()));
+
+        log.info("Created eventId = {}", event.getEventId());
+        return createdReview;
     }
 
     @Override
@@ -45,7 +56,12 @@ public class ReviewServiceImpl implements ReviewService {
             }
 
             log.info("Updating reviewId = {}", review.getReviewId());
-            return reviewRepository.updateReview(review);
+            Review updatedReview = reviewRepository.updateReview(review);
+            Event event = eventService.addEvent(new Event(updatedReview.getUserId(), EventType.REVIEW, Operation.UPDATE,
+                    updatedReview.getReviewId()));
+
+            log.info("Created eventId = {}", event.getEventId());
+            return updatedReview;
         }
         throw new ReviewNotFoundException(String.valueOf(review.getReviewId()));
     }
@@ -62,8 +78,15 @@ public class ReviewServiceImpl implements ReviewService {
         if (!reviewRepository.doesExist(id)) {
             throw new ReviewNotFoundException(String.valueOf(id));
         }
+        Review review = reviewRepository.getReviewById(id)
+                .orElseThrow(() -> new ReviewNotFoundException(String.valueOf(id)));
+
         log.info("Deleting reviewId = {}", id);
         reviewRepository.deleteReviewById(id);
+        Event event = eventService.addEvent(new Event(review.getUserId(), EventType.REVIEW, Operation.REMOVE,
+                review.getReviewId()));
+
+        log.info("Created eventId = {}", event.getEventId());
     }
 
     @Override

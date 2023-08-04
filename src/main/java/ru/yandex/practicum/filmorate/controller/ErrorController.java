@@ -126,6 +126,20 @@ public class ErrorController extends ResponseEntityExceptionHandler {
     }
 
     /**
+     * Обработчик EventNotFoundException
+     *
+     * @param e Эксепшн
+     * @return Объект, содержащий сообщение об ошибке
+     */
+    @ExceptionHandler(EventNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ResponseBody
+    public ErrorInfo processEventNotFoundException(EventNotFoundException e) {
+        log.debug("Can not find event: {}", e.getMessage());
+        return new ErrorInfo(e.getMessage());
+    }
+
+    /**
      * Обработчик непредвиденных ошибок
      *
      * @param e Эксепшн

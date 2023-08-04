@@ -3,7 +3,9 @@ package ru.yandex.practicum.filmorate.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.EventService;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
@@ -14,6 +16,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
+
+    private final EventService eventService;
 
     /**
      * Создание пользователя
@@ -127,5 +131,16 @@ public class UserController {
     @GetMapping("/{id}/recommendations")
     public List<Film> getRecommendations(@PathVariable Integer id) {
         return userService.getRecommendations(id);
+    }
+
+    /**
+     * Получение ленты событий по идентификатору пользователя
+     *
+     * @param id Идентификатор пользователя
+     * @return Список событий
+     */
+    @GetMapping("{id}/feed")
+    public List<Event> getFeedByUserId(@PathVariable Integer id) {
+        return eventService.getFeedByUserId(id);
     }
 }
