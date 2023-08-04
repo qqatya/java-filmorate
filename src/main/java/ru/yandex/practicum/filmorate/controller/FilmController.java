@@ -128,7 +128,21 @@ public class FilmController {
      * @return Список фильмов режиссера
      */
     @GetMapping("/director/{directorId}")
-    public List<Film> getFilmsByDirectorIdSorted(@PathVariable int directorId, @RequestParam(defaultValue = "likes") String sortBy) {
+    public List<Film> getFilmsByDirectorIdSorted(@PathVariable int directorId,
+                                                 @RequestParam(defaultValue = "likes") String sortBy) {
         return filmService.getFilmsByDirectorIdSorted(directorId, sortBy);
+    }
+
+    /**
+     * Получение списка фильмов по парамметрам поиска
+     *
+     * @param query Текст для поиска
+     * @param by    Параметр поиска: по режиссёру/по названию/по режиссеру и по названию
+     * @return Список фильмов, отсортированных по популярности
+     */
+    @GetMapping("/search")
+    public List<Film> searchFilms(@RequestParam(required = false) String query,
+                                  @RequestParam(required = false) String by) {
+        return filmService.searchFilms(query, by);
     }
 }

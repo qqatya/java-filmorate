@@ -112,4 +112,10 @@ public class FilmServiceImpl implements FilmService {
         log.info("Getting films with directorId = {} by sort = {}", directorId, sortBy);
         return filmRepository.getFilmsByDirectorId(directorId, sortBy);
     }
+
+    @Override
+    public List<Film> searchFilms(String query, String by) {
+        log.info("Getting search films, where query = {} and by = {}", query, by);
+        return filmRepository.searchFilms(query, by);
+    }
 }

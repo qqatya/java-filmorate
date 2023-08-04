@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Type;
 import ru.yandex.practicum.filmorate.repository.DirectorRepository;
 import ru.yandex.practicum.filmorate.repository.FilmRepository;
 import ru.yandex.practicum.filmorate.repository.GenreRepository;
@@ -54,8 +55,7 @@ public class FilmRepositoryImpl implements FilmRepository {
             "ORDER BY COUNT(f.id) DESC ";
 
     private static final String SQL_DELETE_FILM_BY_ID = "DELETE FROM public.film WHERE id = :id";
-    private static final String SQL_GET_DIRECTORS_BY_FILM_ID = "SELECT director_id FROM public.film_director "
-            + "WHERE film_id = :film_id";
+
     private static final String SQL_GET_FILMS_BY_DIRECTOR_ID = "SELECT film.id, film.name, film.description, " +
             "film.release_date, film.duration, film.rating_id " +
             "FROM public.film INNER JOIN public.film_director ON film_director.film_id = film.id " +
@@ -92,6 +92,39 @@ public class FilmRepositoryImpl implements FilmRepository {
             "ORDER BY COUNT(fl.liked_person_id) DESC " +
             "LIMIT :count ";
 
+    private static final String SQL_GET_FILMS_SEARCH_ALL = "SELECT film.* " +
+            "FROM film " +
+            "LEFT JOIN film_like AS fl ON film.id = fl.film_id " +
+            "GROUP BY film.id " +
+            "ORDER BY COUNT(fl.liked_person_id) DESC";
+
+    private static final String SQL_GET_FILMS_SEARCH_IN_TITLE = "SELECT film.id, film.name, film.description, " +
+            "film.release_date, film.duration, film.rating_id " +
+            "FROM film LEFT JOIN film_like ON film.id = film_like.film_id " +
+            "WHERE LOWER(film.name) LIKE CONCAT('%', :query, '%') " +
+            "GROUP BY film.id " +
+            "ORDER BY COUNT(film_like.liked_person_id) DESC";
+
+    private static final String SQL_GET_FILMS_SEARCH_IN_DIRECTOR = "SELECT film.id, film.name, film.description, " +
+            "film.release_date, film.duration, film.rating_id " +
+            "FROM film " +
+            "LEFT JOIN film_like AS fl ON film.id = fl.film_id " +
+            "WHERE film.id IN (SELECT fd.film_id " +
+            "FROM director LEFT JOIN film_director AS fd ON fd.director_id = director.id " +
+            "WHERE LOWER(director.name) LIKE CONCAT('%', :query, '%')) " +
+            "GROUP BY film.id " +
+            "ORDER BY COUNT(fl.liked_person_id) DESC";
+
+    private static final String SQL_GET_FILMS_SEARCH_IN_DIRECTOR_AND_TITLE = "SELECT film.* " +
+            "FROM film " +
+            "LEFT JOIN film_like AS fl ON film.id = fl.film_id " +
+            "WHERE film.id IN (SELECT fd.film_id " +
+            "FROM director " +
+            "LEFT JOIN film_director fd ON fd.director_id = director.id " +
+            "WHERE LOWER(director.name) LIKE CONCAT('%', :query, '%')) " +
+            "OR LOWER(film.name) LIKE CONCAT('%', :query, '%') " +
+            "GROUP BY film.id " +
+            "ORDER BY COUNT(fl.liked_person_id) DESC";
 
     @Override
     public Film insertFilm(Film film) {
@@ -213,6 +246,23 @@ public class FilmRepositoryImpl implements FilmRepository {
         return jdbcTemplate.query(SQL_COMMON_FILMS, params, filmMapper);
     }
 
+    @Override
+    public List<Film> searchFilms(String query, String by) {
+        var params = new MapSqlParameterSource();
+        //params.addValue("query", "%" + query.toLowerCase() + "%");
+        params.addValue("query", query.toLowerCase());
+        Type type = Type.of(by);
+        switch (type) {
+            case DIRECTOR:
+                return jdbcTemplate.query(SQL_GET_FILMS_SEARCH_IN_DIRECTOR, params, filmMapper);
+            case TITLE:
+                return jdbcTemplate.query(SQL_GET_FILMS_SEARCH_IN_TITLE, params, filmMapper);
+            case TITLE_DIRECTOR: case DIRECTOR_TITLE:
+                return jdbcTemplate.query(SQL_GET_FILMS_SEARCH_IN_DIRECTOR_AND_TITLE, params, filmMapper);
+            default:
+                return jdbcTemplate.query(SQL_GET_FILMS_SEARCH_ALL, params, filmMapper);
+        }
+    }
 
     private MapSqlParameterSource getParams(Film film) {
         var params = new MapSqlParameterSource();

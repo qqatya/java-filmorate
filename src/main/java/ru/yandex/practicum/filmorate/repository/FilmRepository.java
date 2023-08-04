@@ -97,4 +97,13 @@ public interface FilmRepository {
      * @return Список фильмов (пустой, если такого режиссёра нет)
      */
     List<Film> getFilmsByDirectorId(Integer directorId, String sortBy);
+
+    /**
+     * Получение списка фильмов по парамметрам поиска
+     *
+     * @param query Текст для поиска
+     * @param by    Параметр поиска: по режиссёру/по названию/по режиссеру и по названию
+     * @return Список фильмов, отсортированных по популярности
+     */
+    List<Film> searchFilms(String query, String by);
 }
