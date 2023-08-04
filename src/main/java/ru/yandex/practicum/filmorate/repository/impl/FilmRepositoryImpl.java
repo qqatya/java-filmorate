@@ -249,7 +249,6 @@ public class FilmRepositoryImpl implements FilmRepository {
     @Override
     public List<Film> searchFilms(String query, String by) {
         var params = new MapSqlParameterSource();
-        //params.addValue("query", "%" + query.toLowerCase() + "%");
         params.addValue("query", query.toLowerCase());
         Type type = Type.of(by);
         switch (type) {
