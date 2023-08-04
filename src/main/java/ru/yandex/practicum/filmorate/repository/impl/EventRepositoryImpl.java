@@ -32,7 +32,7 @@ public class EventRepositoryImpl implements EventRepository {
             + "FROM public.event WHERE id = :id";
 
     private static final String SQL_GET_EVENTS_BY_USER_ID = "SELECT id, timestamp, operation, type, person_id, "
-            + "entity_id FROM public.event WHERE id = :id";
+            + "entity_id FROM public.event WHERE person_id = :id";
 
     @Override
     public Event insertEvent(Event event) {
