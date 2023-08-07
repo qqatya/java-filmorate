@@ -5,9 +5,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.model.Event;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Friend;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.type.EventType;
+import ru.yandex.practicum.filmorate.model.type.Operation;
 import ru.yandex.practicum.filmorate.repository.UserRepository;
+import ru.yandex.practicum.filmorate.service.EventService;
 import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.validation.UserValidator;
 
@@ -22,6 +27,7 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserValidator userValidator;
+    private final EventService eventService;
 
     @Override
     public User createUser(User user) {
@@ -61,7 +67,11 @@ public class UserServiceImpl implements UserService {
             throw new UserNotFoundException(String.valueOf(friendId));
         }
         log.info("Adding userId = {} to friends of userId = {}", friendId, userId);
-        return userRepository.addFriend(userId, friendId);
+        User updatedUser = userRepository.addFriend(userId, friendId);
+        Event event = eventService.addEvent(new Event(userId, EventType.FRIEND, Operation.ADD, friendId));
+
+        log.info("Created eventId = {}", event.getEventId());
+        return updatedUser;
     }
 
     @Override
@@ -80,7 +90,11 @@ public class UserServiceImpl implements UserService {
 
         if (friendIds.contains(friendId)) {
             log.info("Deleting userId = {} from friends of userId = {}", friendId, userId);
-            return userRepository.deleteFriend(userId, friendId);
+            User updatedUser = userRepository.deleteFriend(userId, friendId);
+            Event event = eventService.addEvent(new Event(userId, EventType.FRIEND, Operation.REMOVE, friendId));
+
+            log.info("Created eventId = {}", event.getEventId());
+            return updatedUser;
         }
 
         throw new ValidationException(
@@ -106,5 +120,22 @@ public class UserServiceImpl implements UserService {
         }
         log.info("Getting common friends of userId = {} and userId = {}", userId, otherId);
         return userRepository.getCommonFriends(userId, otherId);
+    }
+
+    @Override
+    public void deleteUserById(Integer id) {
+        if (!userRepository.doesExist(id)) {
+            throw new UserNotFoundException(String.valueOf(id));
+        }
+        log.info("Deleting userId = {}", id);
+        userRepository.deleteUserById(id);
+    }
+
+    public List<Film> getRecommendations(Integer id) {
+        if (!userRepository.doesExist(id)) {
+            throw new UserNotFoundException(String.valueOf(id));
+        }
+        log.info("Getting recommendation films by userId = {}", id);
+        return userRepository.getRecommendations(id);
     }
 }
