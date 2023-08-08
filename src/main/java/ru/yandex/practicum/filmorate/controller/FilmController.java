@@ -65,10 +65,10 @@ public class FilmController {
      * @param grade  Оценка фильма
      * @return Фильм с обновленным списком лайков
      */
-    @PutMapping("/{id}/like")
+    @PutMapping("/{id}/like/{userId}")
     public Film putLike(@PathVariable Integer id,
-                        @RequestParam Integer userId,
-                        @RequestParam Integer grade) {
+                        @PathVariable Integer userId,
+                        @RequestParam(defaultValue = "1") Integer grade) {
         return filmService.putLike(id, userId, grade);
     }
 

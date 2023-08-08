@@ -42,7 +42,7 @@ public interface FilmRepository {
      *
      * @param id     Идентификатор фильма
      * @param userId Идентификатор пользователя
-     * @param grade Оценка фильма
+     * @param grade  Оценка фильма
      * @return Фильм с обновленным списком лайков
      */
     Film putLike(Integer id, Integer userId, Integer grade);

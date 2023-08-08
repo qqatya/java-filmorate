@@ -175,6 +175,7 @@ public class FilmRepositoryImpl implements FilmRepository {
     @Override
     public Film putLike(Integer id, Integer userId, Integer grade) {
         MapSqlParameterSource params = getLikeParams(id, userId);
+
         params.addValue("grade", grade);
         jdbcTemplate.update(SQL_INSERT_LIKE, params);
         Film film = getFilmById(id).orElseThrow(() -> new FilmNotFoundException(String.valueOf(id)));

@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.DirectorNotFoundException;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.exception.GradeOutOfBoundsException;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -67,8 +68,11 @@ public class FilmServiceImpl implements FilmService {
         if (!userRepository.doesExist(userId)) {
             throw new UserNotFoundException(String.valueOf(userId));
         }
+        if (grade < 1 || grade > 10) {
+            throw new GradeOutOfBoundsException();
+        }
         log.info("Adding like from userId = {} to filmId = {}, grade = {}", userId, id, grade);
-        Film updatedFilm = filmRepository.putLike(id, userId,grade);
+        Film updatedFilm = filmRepository.putLike(id, userId, grade);
         Event event = eventService.addEvent(new Event(userId, EventType.LIKE, Operation.ADD, id));
 
         log.info("Created eventId = {}", event.getEventId());

@@ -150,7 +150,7 @@ class UserRepositoryTest {
 
     @Test
     @Order(10)
-    void getRecommendationsTest(){
+    void getRecommendationsTest() {
         Film film = filmRepository.insertFilm(Film.builder()
                 .id(1)
                 .name("NameTest1")
@@ -196,17 +196,11 @@ class UserRepositoryTest {
                 .name(NAME)
                 .birthday(LocalDate.of(2000, 9, 10))
                 .build());
-        filmRepository.putLike(1,1,6);
-        filmRepository.putLike(1,2,5);
-        filmRepository.putLike(2,2,7);
-        filmRepository.putLike(3,2,2);
+        filmRepository.putLike(1, 1, 6);
+        filmRepository.putLike(1, 2, 5);
+        filmRepository.putLike(2, 2, 7);
+        filmRepository.putLike(3, 2, 2);
         List<Film> films = userRepository.getRecommendations(1);
-       assertEquals( userRepository.getRecommendations(1).size(),1);
-
-
-
-
-
-
+        assertEquals(userRepository.getRecommendations(1).size(), 1);
     }
 }
