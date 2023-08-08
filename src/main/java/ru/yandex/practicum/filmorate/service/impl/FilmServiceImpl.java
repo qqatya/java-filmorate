@@ -59,15 +59,16 @@ public class FilmServiceImpl implements FilmService {
     }
 
     @Override
-    public Film putLike(Integer id, Integer userId) {
+    public Film putLike(Integer id, Integer userId, Integer grade) {
+
         if (!filmRepository.doesExist(id)) {
             throw new FilmNotFoundException(String.valueOf(id));
         }
         if (!userRepository.doesExist(userId)) {
             throw new UserNotFoundException(String.valueOf(userId));
         }
-        log.info("Adding like from userId = {} to filmId = {}", userId, id);
-        Film updatedFilm = filmRepository.putLike(id, userId);
+        log.info("Adding like from userId = {} to filmId = {}, grade = {}", userId, id, grade);
+        Film updatedFilm = filmRepository.putLike(id, userId,grade);
         Event event = eventService.addEvent(new Event(userId, EventType.LIKE, Operation.ADD, id));
 
         log.info("Created eventId = {}", event.getEventId());

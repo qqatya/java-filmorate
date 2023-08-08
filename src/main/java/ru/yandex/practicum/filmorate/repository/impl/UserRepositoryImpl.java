@@ -65,7 +65,7 @@ public class UserRepositoryImpl implements UserRepository {
             "ORDER BY COUNT(l.film_id) DESC LIMIT 1";
 
     private static final String SQL_GET_RECOMMENDATIONS = "SELECT l.film_id FROM public.film_like AS l " +
-            "WHERE l.liked_person_id = :other_id AND l.film_id NOT IN " +
+            "WHERE l.grade BETWEEN 5 AND 10 AND l.liked_person_id = :other_id AND l.film_id NOT IN " +
             "(SELECT l2.film_id FROM public.film_like AS l2 WHERE l2.liked_person_id = :id)";
 
     @Override

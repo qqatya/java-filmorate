@@ -110,7 +110,7 @@ class FilmRepositoryTest {
                 .birthday(LocalDate.of(2000, 9, 10))
                 .build());
 
-        Film film = filmRepository.putLike(1, user.getId());
+        Film film = filmRepository.putLike(1, user.getId(),6);
 
         assertTrue(film.getUsersLiked().contains(user.getId()));
 

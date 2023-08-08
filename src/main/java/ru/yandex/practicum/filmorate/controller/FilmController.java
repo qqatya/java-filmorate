@@ -62,12 +62,14 @@ public class FilmController {
      *
      * @param id     Идентификатор фильма
      * @param userId Идентификатор пользователя
+     * @param grade  Оценка фильма
      * @return Фильм с обновленным списком лайков
      */
-    @PutMapping("/{id}/like/{userId}")
+    @PutMapping("/{id}/like")
     public Film putLike(@PathVariable Integer id,
-                        @PathVariable Integer userId) {
-        return filmService.putLike(id, userId);
+                        @RequestParam Integer userId,
+                        @RequestParam Integer grade) {
+        return filmService.putLike(id, userId, grade);
     }
 
     /**

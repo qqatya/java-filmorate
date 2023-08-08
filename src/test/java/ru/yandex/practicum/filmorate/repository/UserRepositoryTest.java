@@ -8,8 +8,11 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.repository.impl.FilmRepositoryImpl;
 import ru.yandex.practicum.filmorate.repository.impl.UserRepositoryImpl;
+import ru.yandex.practicum.filmorate.service.RatingService;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -26,6 +29,8 @@ import static org.junit.jupiter.api.Assertions.*;
 class UserRepositoryTest {
 
     private final UserRepositoryImpl userRepository;
+    private final FilmRepositoryImpl filmRepository;
+    private final RatingService ratingService;
 
     private static final String EMAIL = "ivan@ya.ru";
     private static final String LOGIN = "iwwwwan";
@@ -141,5 +146,67 @@ class UserRepositoryTest {
     @Order(9)
     void doesExist() {
         assertTrue(userRepository.doesExist(1));
+    }
+
+    @Test
+    @Order(10)
+    void getRecommendationsTest(){
+        Film film = filmRepository.insertFilm(Film.builder()
+                .id(1)
+                .name("NameTest1")
+                .description("DescriptionTest1")
+                .releaseDate(LocalDate.now())
+                .duration(20L)
+                .mpa(ratingService.getRatingById(1))
+                .build());
+        Film film2 = filmRepository.insertFilm(Film.builder()
+                .id(2)
+                .name("NameTest2")
+                .description("DescriptionTest2")
+                .releaseDate(LocalDate.now())
+                .duration(20L)
+                .mpa(ratingService.getRatingById(1))
+                .build());
+        Film film3 = filmRepository.insertFilm(Film.builder()
+                .id(3)
+                .name("NameTest3")
+                .description("DescriptionTest3")
+                .releaseDate(LocalDate.now())
+                .duration(20L)
+                .mpa(ratingService.getRatingById(1))
+                .build());
+        User user = userRepository.insertUser(User.builder()
+                .id(11)
+                .email(EMAIL)
+                .login("TestLogin")
+                .name(NAME)
+                .birthday(LocalDate.of(2000, 9, 10))
+                .build());
+        User user2 = userRepository.insertUser(User.builder()
+                .id(12)
+                .email(EMAIL)
+                .login("TestLogin2")
+                .name(NAME)
+                .birthday(LocalDate.of(2000, 9, 10))
+                .build());
+        User user3 = userRepository.insertUser(User.builder()
+                .id(13)
+                .email(EMAIL)
+                .login("TestLogin3")
+                .name(NAME)
+                .birthday(LocalDate.of(2000, 9, 10))
+                .build());
+        filmRepository.putLike(1,1,6);
+        filmRepository.putLike(1,2,5);
+        filmRepository.putLike(2,2,7);
+        filmRepository.putLike(3,2,2);
+        List<Film> films = userRepository.getRecommendations(1);
+       assertEquals( userRepository.getRecommendations(1).size(),1);
+
+
+
+
+
+
     }
 }

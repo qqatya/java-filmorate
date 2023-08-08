@@ -38,8 +38,8 @@ public class FilmRepositoryImpl implements FilmRepository {
             + "FROM public.film WHERE id = :id";
     private static final String SQL_GET_ALL_FILMS = "SELECT id, name, description, release_date, duration, rating_id "
             + "FROM public.film";
-    private static final String SQL_INSERT_LIKE = "INSERT INTO public.film_like (film_id, liked_person_id) "
-            + "VALUES (:film_id, :person_id)";
+    private static final String SQL_INSERT_LIKE = "INSERT INTO public.film_like (film_id, liked_person_id, grade) "
+            + "VALUES (:film_id, :person_id, :grade)";
     private static final String SQL_DELETE_LIKE = "DELETE FROM public.film_like "
             + "WHERE film_id = :film_id AND liked_person_id = :person_id";
 
@@ -72,7 +72,7 @@ public class FilmRepositoryImpl implements FilmRepository {
             "LEFT JOIN film_genre AS fg ON f.id = fg.film_id " +
             "WHERE fg.genre_id = :genreId " +
             "GROUP BY f.id " +
-            "ORDER BY COUNT(fl.liked_person_id) DESC " +
+            "ORDER BY AVG(fl.grade) DESC " +
             "LIMIT :count ";
 
     private static final String SQL_POPULAR_FILMS_YEAR = "SELECT * " +
@@ -80,7 +80,7 @@ public class FilmRepositoryImpl implements FilmRepository {
             "LEFT JOIN film_like AS fl ON f.id = fl.film_id " +
             "WHERE EXTRACT(YEAR FROM f.release_date) = :year " +
             "GROUP BY f.id  " +
-            "ORDER BY COUNT(fl.liked_person_id) DESC " +
+            "ORDER BY AVG(fl.grade) DESC " +
             "LIMIT :count ";
 
     private static final String SQL_POPULAR_FILMS_GENRE_YEAR = "SELECT * " +
@@ -89,7 +89,7 @@ public class FilmRepositoryImpl implements FilmRepository {
             "LEFT JOIN film_genre AS fg ON f.id = fg.film_id " +
             "WHERE fg.genre_id = :genreId AND EXTRACT(YEAR FROM f.release_date) = :year " +
             "GROUP BY f.id " +
-            "ORDER BY COUNT(fl.liked_person_id) DESC " +
+            "ORDER BY AVG(fl.grade) DESC " +
             "LIMIT :count ";
 
     private static final String SQL_GET_FILMS_SEARCH_IN_TITLE = "SELECT film.id, film.name, film.description, " +
@@ -173,9 +173,9 @@ public class FilmRepositoryImpl implements FilmRepository {
     }
 
     @Override
-    public Film putLike(Integer id, Integer userId) {
+    public Film putLike(Integer id, Integer userId, Integer grade) {
         MapSqlParameterSource params = getLikeParams(id, userId);
-
+        params.addValue("grade", grade);
         jdbcTemplate.update(SQL_INSERT_LIKE, params);
         Film film = getFilmById(id).orElseThrow(() -> new FilmNotFoundException(String.valueOf(id)));
         Set<Integer> usersLiked = userLikeRepository.getUsersLikedByFilmId(id);
