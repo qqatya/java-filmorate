@@ -123,18 +123,6 @@ public class FilmRepositoryImpl implements FilmRepository {
             "GROUP BY film.id " +
             "ORDER BY COUNT(fl.liked_person_id) DESC";
 
-    /*private static final String SQL_GET_FILMS_SEARCH_IN_DIRECTOR_AND_TITLE = "SELECT film.id, film.name, " +
-            "film.description, film.release_date, film.duration, film.rating_id " +
-            "FROM public.film " +
-            "LEFT JOIN public.film_like AS fl ON film.id = fl.film_id " +
-            "WHERE film.id IN (SELECT fd.film_id " +
-            "FROM public.director " +
-            "LEFT JOIN public.film_director fd ON fd.director_id = director.id " +
-            "WHERE LOWER(director.name) LIKE CONCAT('%', :query, '%')) " +
-            "OR LOWER(film.name) LIKE CONCAT('%', :query, '%') " +
-            "GROUP BY film.id " +
-            "ORDER BY AVG(fl.grade) DESC";*/
-
     private static final String SQL_GET_FILMS_BY_GRADE = "SELECT f.id, f.name, f.description,f.release_date, " +
             "f.duration, f.rating_id " +
             "FROM public.film AS f LEFT JOIN public.film_like AS l ON f.id = l.film_id " +
