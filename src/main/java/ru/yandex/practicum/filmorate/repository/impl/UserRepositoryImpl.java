@@ -58,14 +58,17 @@ public class UserRepositoryImpl implements UserRepository {
     private static final String SQL_DELETE_USER_BY_ID = "DELETE FROM public.person WHERE id = :id";
 
     private static final String SQL_GET_SIMILAR_USER = "SELECT l.liked_person_id FROM public.film_like AS l " +
-            "WHERE l.film_id IN " +
-            "(SELECT l2.film_id FROM public.film_like AS l2 WHERE l2.liked_person_id = :id) " +
+            "LEFT JOIN public.film_like AS l2 ON l.film_id = l2.film_id WHERE l.grade = l2.grade " +
             "AND l.liked_person_id != :id " +
             "GROUP BY l.liked_person_id " +
             "ORDER BY COUNT(l.film_id) DESC LIMIT 1";
 
     private static final String SQL_GET_RECOMMENDATIONS = "SELECT l.film_id FROM public.film_like AS l " +
-            "WHERE l.grade BETWEEN 5 AND 10 AND l.liked_person_id = :other_id AND l.film_id NOT IN " +
+            "WHERE l.grade BETWEEN 6 AND 10 AND l.liked_person_id = :other_id AND l.film_id NOT IN " +
+            "(SELECT l2.film_id FROM public.film_like AS l2 WHERE l2.liked_person_id = :id)";
+
+    private static final String SQL_GET_RECOMMENDATIONS_DEFAULT = "SELECT l.film_id FROM public.film_like AS l " +
+            "WHERE l.liked_person_id = :other_id AND l.film_id NOT IN " +
             "(SELECT l2.film_id FROM public.film_like AS l2 WHERE l2.liked_person_id = :id)";
 
     @Override
@@ -187,6 +190,9 @@ public class UserRepositoryImpl implements UserRepository {
         params.addValue("id", id);
         params.addValue("other_id", otherId.get());
         List<Integer> filmId = jdbcTemplate.queryForList(SQL_GET_RECOMMENDATIONS, params, Integer.class);
+        if (filmId.size() == 0) {
+           filmId = jdbcTemplate.queryForList(SQL_GET_RECOMMENDATIONS_DEFAULT, params, Integer.class);
+        }
         return filmId.stream()
                 .filter(i -> filmRepository.getFilmById(i).isPresent())
                 .map(i -> filmRepository.getFilmById(i).orElseThrow(() -> new FilmNotFoundException(String.valueOf(i))))

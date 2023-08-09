@@ -61,10 +61,11 @@ public class FilmRepositoryImpl implements FilmRepository {
             "FROM public.film INNER JOIN public.film_director ON film_director.film_id = film.id " +
             "WHERE film_director.director_id = :director_id";
 
-    private static final String SQL_POPULAR_FILMS = "SELECT * FROM film AS f " +
-            "LEFT JOIN film_like AS fl ON  fl.film_id = f.id " +
-            "GROUP BY f.id, fl.liked_person_id " +
-            "ORDER BY COUNT(fl.liked_person_id) DESC " +
+    private static final String SQL_POPULAR_FILMS = "SELECT f.id, f.name, f.description,f.release_date, " +
+            "f.duration, f.rating_id FROM film AS f " +
+            "LEFT JOIN film_like AS fl ON fl.film_id = f.id " +
+            "GROUP BY f.id " +
+            "ORDER BY AVG(fl.grade) DESC " +
             "LIMIT :count ";
     private static final String SQL_POPULAR_FILMS_GENRE = "SELECT * " +
             "FROM public.film AS f " +
@@ -75,7 +76,8 @@ public class FilmRepositoryImpl implements FilmRepository {
             "ORDER BY AVG(fl.grade) DESC " +
             "LIMIT :count ";
 
-    private static final String SQL_POPULAR_FILMS_YEAR = "SELECT * " +
+    private static final String SQL_POPULAR_FILMS_YEAR = "SELECT f.id, f.name, f.description,f.release_date, " +
+            "f.duration, f.rating_id " +
             "FROM public.film AS f " +
             "LEFT JOIN film_like AS fl ON f.id = fl.film_id " +
             "WHERE EXTRACT(YEAR FROM f.release_date) = :year " +
@@ -83,7 +85,8 @@ public class FilmRepositoryImpl implements FilmRepository {
             "ORDER BY AVG(fl.grade) DESC " +
             "LIMIT :count ";
 
-    private static final String SQL_POPULAR_FILMS_GENRE_YEAR = "SELECT * " +
+    private static final String SQL_POPULAR_FILMS_GENRE_YEAR = "SELECT f.id, f.name, f.description,f.release_date, " +
+            "f.duration, f.rating_id " +
             "FROM public.film AS f " +
             "LEFT JOIN film_like AS fl ON f.id = fl.film_id " +
             "LEFT JOIN film_genre AS fg ON f.id = fg.film_id " +
@@ -94,20 +97,20 @@ public class FilmRepositoryImpl implements FilmRepository {
 
     private static final String SQL_GET_FILMS_SEARCH_IN_TITLE = "SELECT film.id, film.name, film.description, " +
             "film.release_date, film.duration, film.rating_id " +
-            "FROM film LEFT JOIN film_like ON film.id = film_like.film_id " +
+            "FROM public.film LEFT JOIN public.film_like AS fl ON film.id = fl.film_id " +
             "WHERE LOWER(film.name) LIKE CONCAT('%', :query, '%') " +
             "GROUP BY film.id " +
-            "ORDER BY COUNT(film_like.liked_person_id) DESC";
+            "ORDER BY AVG(fl.grade) DESC";
 
     private static final String SQL_GET_FILMS_SEARCH_IN_DIRECTOR = "SELECT film.id, film.name, film.description, " +
             "film.release_date, film.duration, film.rating_id " +
-            "FROM film " +
-            "LEFT JOIN film_like AS fl ON film.id = fl.film_id " +
+            "FROM public.film " +
+            "LEFT JOIN public.film_like AS fl ON film.id = fl.film_id " +
             "WHERE film.id IN (SELECT fd.film_id " +
-            "FROM director LEFT JOIN film_director AS fd ON fd.director_id = director.id " +
+            "FROM public.director LEFT JOIN public.film_director AS fd ON fd.director_id = director.id " +
             "WHERE LOWER(director.name) LIKE CONCAT('%', :query, '%')) " +
             "GROUP BY film.id " +
-            "ORDER BY COUNT(fl.liked_person_id) DESC";
+            "ORDER BY AVG(fl.grade) DESC";
 
     private static final String SQL_GET_FILMS_SEARCH_IN_DIRECTOR_AND_TITLE = "SELECT film.* " +
             "FROM film " +
@@ -119,6 +122,25 @@ public class FilmRepositoryImpl implements FilmRepository {
             "OR LOWER(film.name) LIKE CONCAT('%', :query, '%') " +
             "GROUP BY film.id " +
             "ORDER BY COUNT(fl.liked_person_id) DESC";
+
+    /*private static final String SQL_GET_FILMS_SEARCH_IN_DIRECTOR_AND_TITLE = "SELECT film.id, film.name, " +
+            "film.description, film.release_date, film.duration, film.rating_id " +
+            "FROM public.film " +
+            "LEFT JOIN public.film_like AS fl ON film.id = fl.film_id " +
+            "WHERE film.id IN (SELECT fd.film_id " +
+            "FROM public.director " +
+            "LEFT JOIN public.film_director fd ON fd.director_id = director.id " +
+            "WHERE LOWER(director.name) LIKE CONCAT('%', :query, '%')) " +
+            "OR LOWER(film.name) LIKE CONCAT('%', :query, '%') " +
+            "GROUP BY film.id " +
+            "ORDER BY AVG(fl.grade) DESC";*/
+
+    private static final String SQL_GET_FILMS_BY_GRADE = "SELECT f.id, f.name, f.description,f.release_date, " +
+            "f.duration, f.rating_id " +
+            "FROM public.film AS f LEFT JOIN public.film_like AS l ON f.id = l.film_id " +
+            "WHERE f.id IN (SELECT d.film_id FROM public.film_director AS d WHERE d.director_id = :director_id )" +
+            "GROUP BY f.id " +
+            "ORDER BY AVG(l.grade) DESC";
 
     @Override
     public Film insertFilm(Film film) {
@@ -173,7 +195,7 @@ public class FilmRepositoryImpl implements FilmRepository {
     }
 
     @Override
-    public Film putLike(Integer id, Integer userId, Integer grade) {
+    public Film putLike(Integer id, Integer userId, Double grade) {
         MapSqlParameterSource params = getLikeParams(id, userId);
 
         params.addValue("grade", grade);
@@ -259,6 +281,21 @@ public class FilmRepositoryImpl implements FilmRepository {
         }
     }
 
+    @Override
+    public List<Film> getFilmsByDirectorId(Integer id, String sortBy) {
+        var params = new MapSqlParameterSource();
+        params.addValue("director_id", id);
+        List<Film> films = new ArrayList<>(jdbcTemplate.query(SQL_GET_FILMS_BY_DIRECTOR_ID, params, filmMapper));
+
+        if ("year".equals(sortBy)) {
+            return films.stream()
+                    .sorted(Comparator.comparingInt(film -> film.getReleaseDate().getYear()))
+                    .collect(Collectors.toList());
+        } else {
+            return jdbcTemplate.query(SQL_GET_FILMS_BY_GRADE, params, filmMapper);
+        }
+    }
+
     private MapSqlParameterSource getParams(Film film) {
         var params = new MapSqlParameterSource();
 
@@ -280,21 +317,5 @@ public class FilmRepositoryImpl implements FilmRepository {
         params.addValue("film_id", id);
         params.addValue("person_id", userId);
         return params;
-    }
-
-    public List<Film> getFilmsByDirectorId(Integer id, String sortBy) {
-        var params = new MapSqlParameterSource();
-        params.addValue("director_id", id);
-        List<Film> films = new ArrayList<>(jdbcTemplate.query(SQL_GET_FILMS_BY_DIRECTOR_ID, params, filmMapper));
-
-        if ("year".equals(sortBy)) {
-            return films.stream()
-                    .sorted(Comparator.comparingInt(film -> film.getReleaseDate().getYear()))
-                    .collect(Collectors.toList());
-        } else {
-            return films.stream()
-                    .sorted((film1, film2) -> film2.getUsersLiked().size() - film1.getUsersLiked().size())
-                    .collect(Collectors.toList());
-        }
     }
 }

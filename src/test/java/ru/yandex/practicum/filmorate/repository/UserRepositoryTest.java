@@ -196,11 +196,14 @@ class UserRepositoryTest {
                 .name(NAME)
                 .birthday(LocalDate.of(2000, 9, 10))
                 .build());
-        filmRepository.putLike(1, 1, 6);
-        filmRepository.putLike(1, 2, 5);
-        filmRepository.putLike(2, 2, 7);
-        filmRepository.putLike(3, 2, 2);
-        List<Film> films = userRepository.getRecommendations(1);
+        filmRepository.putLike(1, 1, 6D);
+        filmRepository.putLike(1, 2, 6D);
+        filmRepository.putLike(2, 2, 7D);
+        filmRepository.putLike(3, 2, 1D);
+        filmRepository.putLike(2, 3, 7D);
+        List<Film> filmsRecommendation = userRepository.getRecommendations(1);
         assertEquals(userRepository.getRecommendations(1).size(), 1);
+        List<Film> filmsRecommendationByDefault = userRepository.getRecommendations(3);
+        assertEquals(userRepository.getRecommendations(3).size(), 1);
     }
 }

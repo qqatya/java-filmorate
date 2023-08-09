@@ -60,7 +60,7 @@ public class FilmServiceImpl implements FilmService {
     }
 
     @Override
-    public Film putLike(Integer id, Integer userId, Integer grade) {
+    public Film putLike(Integer id, Integer userId, Double grade) {
 
         if (!filmRepository.doesExist(id)) {
             throw new FilmNotFoundException(String.valueOf(id));

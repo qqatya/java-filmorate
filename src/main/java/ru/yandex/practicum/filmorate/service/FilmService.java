@@ -44,7 +44,7 @@ public interface FilmService {
      * @param grade  Оценка фильма
      * @return Фильм с обновленным списком лайков
      */
-    Film putLike(Integer id, Integer userId, Integer grade);
+    Film putLike(Integer id, Integer userId, Double grade);
 
     /**
      * Удаление лайка пользователя
