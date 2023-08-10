@@ -7,7 +7,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.type.SearchType;
@@ -18,6 +18,8 @@ import ru.yandex.practicum.filmorate.repository.UserLikeRepository;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static ru.yandex.practicum.filmorate.model.type.ExceptionType.FILM_NOT_FOUND;
 
 @Repository
 @Slf4j
@@ -141,7 +143,7 @@ public class FilmRepositoryImpl implements FilmRepository {
 
         genreRepository.insertFilmGenres(film.getGenres(), filmId);
         directorRepository.insertFilmDirectors(film.getDirectors(), filmId);
-        return getFilmById(filmId).orElseThrow(() -> new FilmNotFoundException(String.valueOf(filmId)));
+        return getFilmById(filmId).orElseThrow(() -> new NotFoundException(FILM_NOT_FOUND.getValue() + filmId));
     }
 
     @Override
@@ -166,7 +168,7 @@ public class FilmRepositoryImpl implements FilmRepository {
         }
         Integer filmId = holder.getKey().intValue();
 
-        return getFilmById(filmId).orElseThrow(() -> new FilmNotFoundException(String.valueOf(filmId)));
+        return getFilmById(filmId).orElseThrow(() -> new NotFoundException(FILM_NOT_FOUND.getValue() + filmId));
     }
 
     @Override
@@ -188,7 +190,7 @@ public class FilmRepositoryImpl implements FilmRepository {
 
         params.addValue("grade", grade);
         jdbcTemplate.update(SQL_INSERT_LIKE, params);
-        Film film = getFilmById(id).orElseThrow(() -> new FilmNotFoundException(String.valueOf(id)));
+        Film film = getFilmById(id).orElseThrow(() -> new NotFoundException(FILM_NOT_FOUND.getValue() + id));
         Set<Integer> usersLiked = userLikeRepository.getUsersLikedByFilmId(id);
 
         film.setUsersLiked(usersLiked);
@@ -201,7 +203,7 @@ public class FilmRepositoryImpl implements FilmRepository {
         MapSqlParameterSource params = getLikeParams(id, userId);
 
         jdbcTemplate.update(SQL_DELETE_LIKE, params);
-        Film film = getFilmById(id).orElseThrow(() -> new FilmNotFoundException(String.valueOf(id)));
+        Film film = getFilmById(id).orElseThrow(() -> new NotFoundException(FILM_NOT_FOUND.getValue() + id));
         Set<Integer> usersLiked = userLikeRepository.getUsersLikedByFilmId(id);
 
         film.setUsersLiked(usersLiked);

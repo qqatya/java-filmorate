@@ -3,13 +3,15 @@ package ru.yandex.practicum.filmorate.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.DirectorNotFoundException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.repository.DirectorRepository;
 import ru.yandex.practicum.filmorate.service.DirectorService;
 import ru.yandex.practicum.filmorate.validation.DirectorValidator;
 
 import java.util.List;
+
+import static ru.yandex.practicum.filmorate.model.type.ExceptionType.DIRECTOR_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -31,7 +33,7 @@ public class DirectorServiceImpl implements DirectorService {
             log.info("Updating directorId = {}", director.getId());
             return directorRepository.updateDirector(director);
         }
-        throw new DirectorNotFoundException(String.valueOf(director.getId()));
+        throw new NotFoundException(DIRECTOR_NOT_FOUND.getValue() + director.getId());
     }
 
     @Override
@@ -44,13 +46,13 @@ public class DirectorServiceImpl implements DirectorService {
     public Director getDirectorById(Integer id) {
         log.info("Getting directorId = {}", id);
         return directorRepository.getDirectorById(id)
-                .orElseThrow(() -> new DirectorNotFoundException(String.valueOf(id)));
+                .orElseThrow(() -> new NotFoundException(DIRECTOR_NOT_FOUND.getValue() + id));
     }
 
     @Override
     public void deleteDirectorById(Integer id) {
         if (!directorRepository.doesExist(id)) {
-            throw new DirectorNotFoundException(String.valueOf(id));
+            throw new NotFoundException(DIRECTOR_NOT_FOUND.getValue() + id);
         }
         log.info("Deleting directorId = {}", id);
         directorRepository.deleteDirectorById(id);

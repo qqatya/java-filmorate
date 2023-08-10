@@ -7,13 +7,15 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import ru.yandex.practicum.filmorate.exception.EventNotFoundException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.mapper.EventMapper;
 import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.repository.EventRepository;
 
 import java.util.List;
 import java.util.Optional;
+
+import static ru.yandex.practicum.filmorate.model.type.ExceptionType.EVENT_NOT_FOUND;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -43,7 +45,7 @@ public class EventRepositoryImpl implements EventRepository {
         jdbcTemplate.update(SQL_INSERT_EVENT, params, holder);
         Integer eventId = holder.getKey().intValue();
 
-        return getEventById(eventId).orElseThrow(() -> new EventNotFoundException(String.valueOf(eventId)));
+        return getEventById(eventId).orElseThrow(() -> new NotFoundException(EVENT_NOT_FOUND.getValue() + eventId));
     }
 
     @Override

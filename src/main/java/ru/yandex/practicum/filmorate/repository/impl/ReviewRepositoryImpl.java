@@ -7,7 +7,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import ru.yandex.practicum.filmorate.exception.ReviewNotFoundException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.mapper.ReviewMapper;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.repository.ReviewRepository;
@@ -15,6 +15,8 @@ import ru.yandex.practicum.filmorate.repository.ReviewRepository;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+
+import static ru.yandex.practicum.filmorate.model.type.ExceptionType.REVIEW_NOT_FOUND;
 
 @Repository
 @Slf4j
@@ -69,7 +71,7 @@ public class ReviewRepositoryImpl implements ReviewRepository {
         jdbcTemplate.update(SQL_INSERT_REVIEW, params, holder);
         Integer reviewId = holder.getKey().intValue();
 
-        return getReviewById(reviewId).orElseThrow(() -> new ReviewNotFoundException(String.valueOf(reviewId)));
+        return getReviewById(reviewId).orElseThrow(() -> new NotFoundException(REVIEW_NOT_FOUND.getValue() + reviewId));
     }
 
     @Override
@@ -84,7 +86,8 @@ public class ReviewRepositoryImpl implements ReviewRepository {
         }
         Integer filmId = holder.getKey().intValue();
 
-        return getReviewById(filmId).orElseThrow(() -> new ReviewNotFoundException(String.valueOf(filmId)));
+        return getReviewById(filmId)
+                .orElseThrow(() -> new NotFoundException(REVIEW_NOT_FOUND.getValue() + review.getReviewId()));
     }
 
     @Override
@@ -127,7 +130,7 @@ public class ReviewRepositoryImpl implements ReviewRepository {
         params.addValue("is_positive", true);
         jdbcTemplate.update(SQL_INSERT_REVIEW_RATE_USER, params);
 
-        return getReviewById(id).orElseThrow(() -> new ReviewNotFoundException(String.valueOf(id)));
+        return getReviewById(id).orElseThrow(() -> new NotFoundException(REVIEW_NOT_FOUND.getValue() + id));
     }
 
     @Override
@@ -140,7 +143,7 @@ public class ReviewRepositoryImpl implements ReviewRepository {
         params.addValue("is_positive", false);
         jdbcTemplate.update(SQL_INSERT_REVIEW_RATE_USER, params);
 
-        return getReviewById(id).orElseThrow(() -> new ReviewNotFoundException(String.valueOf(id)));
+        return getReviewById(id).orElseThrow(() -> new NotFoundException(REVIEW_NOT_FOUND.getValue() + id));
     }
 
     @Override
@@ -166,7 +169,7 @@ public class ReviewRepositoryImpl implements ReviewRepository {
         } else {
             jdbcTemplate.update(SQL_LIKE_REVIEW, params);
         }
-        return getReviewById(id).orElseThrow(() -> new ReviewNotFoundException(String.valueOf(id)));
+        return getReviewById(id).orElseThrow(() -> new NotFoundException(REVIEW_NOT_FOUND.getValue() + id));
     }
 
     @Override

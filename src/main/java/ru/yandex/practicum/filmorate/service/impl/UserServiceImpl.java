@@ -3,7 +3,7 @@ package ru.yandex.practicum.filmorate.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static ru.yandex.practicum.filmorate.model.type.ExceptionType.USER_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -42,7 +44,7 @@ public class UserServiceImpl implements UserService {
             log.info("Updating userId = {}", user.getId());
             return userRepository.updateUser(user);
         }
-        throw new UserNotFoundException(String.valueOf(user.getId()));
+        throw new NotFoundException(USER_NOT_FOUND.getValue() + user.getId());
     }
 
     @Override
@@ -55,16 +57,16 @@ public class UserServiceImpl implements UserService {
     public User getUserById(Integer id) {
         log.info("Getting userId = {}", id);
         return userRepository.getUserById(id)
-                .orElseThrow(() -> new UserNotFoundException(String.valueOf(id)));
+                .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND.getValue() + id));
     }
 
     @Override
     public User addFriend(Integer userId, Integer friendId) {
         if (!userRepository.doesExist(userId)) {
-            throw new UserNotFoundException(String.valueOf(userId));
+            throw new NotFoundException(USER_NOT_FOUND.getValue() + userId);
         }
         if (!userRepository.doesExist(friendId)) {
-            throw new UserNotFoundException(String.valueOf(friendId));
+            throw new NotFoundException(USER_NOT_FOUND.getValue() + friendId);
         }
         log.info("Adding userId = {} to friends of userId = {}", friendId, userId);
         User updatedUser = userRepository.addFriend(userId, friendId);
@@ -79,10 +81,10 @@ public class UserServiceImpl implements UserService {
         Optional<User> userOptional = userRepository.getUserById(userId);
 
         if (userOptional.isEmpty()) {
-            throw new UserNotFoundException(String.valueOf(userId));
+            throw new NotFoundException(USER_NOT_FOUND.getValue() + userId);
         }
         if (!userRepository.doesExist(friendId)) {
-            throw new UserNotFoundException(String.valueOf(friendId));
+            throw new NotFoundException(USER_NOT_FOUND.getValue() + friendId);
         }
         Set<Integer> friendIds = userOptional.get().getFriends().stream()
                 .map(Friend::getId)
@@ -104,7 +106,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<User> getAllFriends(Integer id) {
         if (!userRepository.doesExist(id)) {
-            throw new UserNotFoundException(String.valueOf(id));
+            throw new NotFoundException(USER_NOT_FOUND.getValue() + id);
         }
         log.info("Getting all friends of userId = {}", id);
         return userRepository.getAllFriends(id);
@@ -113,10 +115,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<User> getCommonFriends(Integer userId, Integer otherId) {
         if (!userRepository.doesExist(userId)) {
-            throw new UserNotFoundException(String.valueOf(userId));
+            throw new NotFoundException(USER_NOT_FOUND.getValue() + userId);
         }
         if (!userRepository.doesExist(otherId)) {
-            throw new UserNotFoundException(String.valueOf(otherId));
+            throw new NotFoundException(USER_NOT_FOUND.getValue() + otherId);
         }
         log.info("Getting common friends of userId = {} and userId = {}", userId, otherId);
         return userRepository.getCommonFriends(userId, otherId);
@@ -125,7 +127,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteUserById(Integer id) {
         if (!userRepository.doesExist(id)) {
-            throw new UserNotFoundException(String.valueOf(id));
+            throw new NotFoundException(USER_NOT_FOUND.getValue() + id);
         }
         log.info("Deleting userId = {}", id);
         userRepository.deleteUserById(id);
@@ -133,7 +135,7 @@ public class UserServiceImpl implements UserService {
 
     public List<Film> getRecommendations(Integer id) {
         if (!userRepository.doesExist(id)) {
-            throw new UserNotFoundException(String.valueOf(id));
+            throw new NotFoundException(USER_NOT_FOUND.getValue() + id);
         }
         log.info("Getting recommendation films by userId = {}", id);
         return userRepository.getRecommendations(id);

@@ -1,6 +1,8 @@
 package ru.yandex.practicum.filmorate.model.type;
 
-import ru.yandex.practicum.filmorate.exception.SearchTypeNotFoundException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
+
+import static ru.yandex.practicum.filmorate.model.type.ExceptionType.SEARCH_TYPE_NOT_FOUND;
 
 public enum SearchType {
     DIRECTOR("director"),
@@ -22,6 +24,6 @@ public enum SearchType {
                 }
             }
         }
-        throw new SearchTypeNotFoundException(code);
+        throw new NotFoundException(SEARCH_TYPE_NOT_FOUND.getValue() + code);
     }
 }

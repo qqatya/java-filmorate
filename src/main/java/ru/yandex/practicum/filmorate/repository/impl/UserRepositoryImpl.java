@@ -7,8 +7,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
-import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.mapper.UserMapper;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Friend;
@@ -19,6 +18,9 @@ import ru.yandex.practicum.filmorate.repository.UserRepository;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static ru.yandex.practicum.filmorate.model.type.ExceptionType.FILM_NOT_FOUND;
+import static ru.yandex.practicum.filmorate.model.type.ExceptionType.USER_NOT_FOUND;
 
 @Repository
 @Slf4j
@@ -80,7 +82,7 @@ public class UserRepositoryImpl implements UserRepository {
         jdbcTemplate.update(SQL_INSERT_USER, params, holder);
         Integer userId = holder.getKey().intValue();
 
-        return getUserById(userId).orElseThrow(() -> new UserNotFoundException(String.valueOf(userId)));
+        return getUserById(userId).orElseThrow(() -> new NotFoundException(USER_NOT_FOUND.getValue() + userId));
     }
 
     @Override
@@ -95,7 +97,7 @@ public class UserRepositoryImpl implements UserRepository {
         }
         Integer userId = holder.getKey().intValue();
 
-        return getUserById(userId).orElseThrow(() -> new UserNotFoundException(String.valueOf(userId)));
+        return getUserById(userId).orElseThrow(() -> new NotFoundException(USER_NOT_FOUND.getValue() + userId));
     }
 
     @Override
@@ -125,7 +127,7 @@ public class UserRepositoryImpl implements UserRepository {
             params.addValue("is_confirmed", false);
             jdbcTemplate.update(SQL_INSERT_FRIEND, params);
         }
-        return getUserById(userId).orElseThrow(() -> new UserNotFoundException(String.valueOf(userId)));
+        return getUserById(userId).orElseThrow(() -> new NotFoundException(USER_NOT_FOUND.getValue() + userId));
     }
 
     @Override
@@ -135,14 +137,14 @@ public class UserRepositoryImpl implements UserRepository {
         params.addValue("person_id", userId);
         params.addValue("friend_id", friendId);
         jdbcTemplate.update(SQL_DELETE_FRIEND, params);
-        return getUserById(userId).orElseThrow(() -> new UserNotFoundException(String.valueOf(userId)));
+        return getUserById(userId).orElseThrow(() -> new NotFoundException(USER_NOT_FOUND.getValue() + userId));
     }
 
     @Override
     public List<User> getAllFriends(Integer id) {
         return friendRepository.getFriendsByUserId(id).stream()
                 .map(friend -> getUserById(friend.getId())
-                        .orElseThrow(() -> new UserNotFoundException(String.valueOf(friend.getId()))))
+                        .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND.getValue() + friend.getId())))
                 .collect(Collectors.toList());
     }
 
@@ -163,7 +165,7 @@ public class UserRepositoryImpl implements UserRepository {
         log.debug("Common friends list: {}", result);
         return result.stream()
                 .map(friendId -> getUserById(friendId)
-                        .orElseThrow(() -> new UserNotFoundException(String.valueOf(friendId))))
+                        .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND.getValue() + friendId)))
                 .collect(Collectors.toList());
     }
 
@@ -191,11 +193,12 @@ public class UserRepositoryImpl implements UserRepository {
         params.addValue("other_id", otherId.get());
         List<Integer> filmId = jdbcTemplate.queryForList(SQL_GET_RECOMMENDATIONS, params, Integer.class);
         if (filmId.size() == 0) {
-           filmId = jdbcTemplate.queryForList(SQL_GET_RECOMMENDATIONS_DEFAULT, params, Integer.class);
+            filmId = jdbcTemplate.queryForList(SQL_GET_RECOMMENDATIONS_DEFAULT, params, Integer.class);
         }
         return filmId.stream()
                 .filter(i -> filmRepository.getFilmById(i).isPresent())
-                .map(i -> filmRepository.getFilmById(i).orElseThrow(() -> new FilmNotFoundException(String.valueOf(i))))
+                .map(i -> filmRepository.getFilmById(i)
+                        .orElseThrow(() -> new NotFoundException(FILM_NOT_FOUND.getValue() + i)))
                 .collect(Collectors.toList());
     }
 
