@@ -117,7 +117,7 @@ class FilmRepositoryTest {
                 .birthday(LocalDate.of(2000, 9, 10))
                 .build());
 
-        Film film = filmRepository.putLike(1, user.getId(), 6D);
+        Film film = filmRepository.putLike(1, user.getId(), 6);
 
         assertTrue(film.getUsersLiked().contains(user.getId()));
 
@@ -185,11 +185,11 @@ class FilmRepositoryTest {
                 .name("Name3")
                 .birthday(LocalDate.of(2000, 9, 10))
                 .build());
-        filmRepository.putLike(film.getId(), user.getId(), 6D);
-        filmRepository.putLike(film.getId(), user2.getId(), 6D);
-        filmRepository.putLike(film2.getId(), user2.getId(), 7D);
-        filmRepository.putLike(film2.getId(), user3.getId(), 7D);
-        filmRepository.putLike(film3.getId(), user2.getId(), 1D);
+        filmRepository.putLike(film.getId(), user.getId(), 6);
+        filmRepository.putLike(film.getId(), user2.getId(), 6);
+        filmRepository.putLike(film2.getId(), user2.getId(), 7);
+        filmRepository.putLike(film2.getId(), user3.getId(), 7);
+        filmRepository.putLike(film3.getId(), user2.getId(), 1);
 
         List<Film> films = filmRepository.getPopularFilms(3, 1, 2010);
         assertEquals(films.size(), 3);

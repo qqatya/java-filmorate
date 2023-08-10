@@ -98,7 +98,7 @@ public class FilmRepositoryImpl implements FilmRepository {
     }
 
     @Override
-    public Film putLike(Integer id, Integer userId, Double grade) {
+    public Film putLike(Integer id, Integer userId, Integer grade) {
         String sqlInsertLike = "INSERT INTO public.film_like (film_id, liked_person_id, grade) "
                 + "VALUES (:film_id, :person_id, :grade)";
         MapSqlParameterSource params = getLikeParams(id, userId);

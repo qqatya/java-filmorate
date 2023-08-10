@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.GradeOutOfBoundsException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -60,16 +59,13 @@ public class FilmServiceImpl implements FilmService {
     }
 
     @Override
-    public Film putLike(Integer id, Integer userId, Double grade) {
+    public Film putLike(Integer id, Integer userId, Integer grade) {
 
         if (!filmRepository.doesExist(id)) {
             throw new NotFoundException(FILM_NOT_FOUND.getValue() + id);
         }
         if (!userRepository.doesExist(userId)) {
             throw new NotFoundException(USER_NOT_FOUND.getValue() + userId);
-        }
-        if (grade < 1 || grade > 10) {
-            throw new GradeOutOfBoundsException();
         }
         log.info("Adding like from userId = {} to filmId = {}, grade = {}", userId, id, grade);
         Film updatedFilm = filmRepository.putLike(id, userId, grade);

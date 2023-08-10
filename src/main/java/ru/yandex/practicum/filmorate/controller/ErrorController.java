@@ -56,20 +56,6 @@ public class ErrorController extends ResponseEntityExceptionHandler {
     }
 
     /**
-     * Обработчик GradeOutOfBoundsException
-     *
-     * @param e Эксепшн
-     * @return Объект, содержащий сообщение об ошибке
-     */
-    @ExceptionHandler(GradeOutOfBoundsException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ResponseBody
-    public ErrorInfo processGradeOutOfBoundsException(GradeOutOfBoundsException e) {
-        log.debug("Grade value is out of bounds: {}", e.getMessage());
-        return new ErrorInfo(e.getMessage());
-    }
-
-    /**
      * Обработчик непредвиденных ошибок
      *
      * @param e Эксепшн
