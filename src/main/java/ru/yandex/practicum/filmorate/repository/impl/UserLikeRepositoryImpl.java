@@ -18,14 +18,13 @@ public class UserLikeRepositoryImpl implements UserLikeRepository {
 
     private final UserLikeMapper userLikeMapper;
 
-    private static final String SQL_GET_LIKES_BY_FILM_ID = "SELECT liked_person_id FROM public.film_like "
-            + "WHERE film_id = :film_id";
-
     @Override
     public Set<Integer> getUsersLikedByFilmId(Integer id) {
+        String sqlGetLikesByFilmId = "SELECT liked_person_id FROM public.film_like "
+                + "WHERE film_id = :film_id";
         var params = new MapSqlParameterSource();
 
         params.addValue("film_id", id);
-        return new HashSet<>(jdbcTemplate.query(SQL_GET_LIKES_BY_FILM_ID, params, userLikeMapper));
+        return new HashSet<>(jdbcTemplate.query(sqlGetLikesByFilmId, params, userLikeMapper));
     }
 }
