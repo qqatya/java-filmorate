@@ -162,12 +162,9 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public List<Film> getRecommendations(Integer id) {
-        String sqlGetRecommendations = "SELECT l.film_id FROM public.film_like AS l " +
-                "WHERE l.grade BETWEEN 6 AND 10 AND l.liked_person_id = :other_id AND l.film_id NOT IN " +
-                "(SELECT l2.film_id FROM public.film_like AS l2 WHERE l2.liked_person_id = :id)";
-        String sqlGetRecommendationsDefault = "SELECT l.film_id FROM public.film_like AS l " +
-                "WHERE l.liked_person_id = :other_id AND l.film_id NOT IN " +
-                "(SELECT l2.film_id FROM public.film_like AS l2 WHERE l2.liked_person_id = :id)";
+        String sqlGetRecommendations = "SELECT l.film_id FROM public.film_like AS l "
+                + "WHERE l.grade BETWEEN 6 AND 10 AND l.liked_person_id = :other_id AND l.film_id NOT IN "
+                + "(SELECT l2.film_id FROM public.film_like AS l2 WHERE l2.liked_person_id = :id)";
         var params = new MapSqlParameterSource();
         Optional<Integer> otherId = getSimilarUserId(id);
         if (otherId.isEmpty()) {
@@ -176,9 +173,6 @@ public class UserRepositoryImpl implements UserRepository {
         params.addValue("id", id);
         params.addValue("other_id", otherId.get());
         List<Integer> filmId = jdbcTemplate.queryForList(sqlGetRecommendations, params, Integer.class);
-        if (filmId.size() == 0) {
-            filmId = jdbcTemplate.queryForList(sqlGetRecommendationsDefault, params, Integer.class);
-        }
         return filmId.stream()
                 .filter(i -> filmRepository.getFilmById(i).isPresent())
                 .map(i -> filmRepository.getFilmById(i)
@@ -189,7 +183,8 @@ public class UserRepositoryImpl implements UserRepository {
     private Optional<Integer> getSimilarUserId(Integer id) {
         String sqlGetSimilarUser = "SELECT l.liked_person_id FROM public.film_like AS l "
                 + "LEFT JOIN public.film_like AS l2 ON l.film_id = l2.film_id WHERE l.grade = l2.grade "
-                + "AND l.liked_person_id != :id GROUP BY l.liked_person_id ORDER BY COUNT(l.film_id) DESC LIMIT 1";
+                + "AND l.liked_person_id != :id AND l2.liked_person_id = :id AND l.grade > 5 "
+                + "GROUP BY l.liked_person_id ORDER BY COUNT(l.film_id) DESC LIMIT 1";
         List<Integer> ids = jdbcTemplate.queryForList(sqlGetSimilarUser, Map.of("id", id), Integer.class);
         if (ids.size() != 1) {
             return Optional.empty();

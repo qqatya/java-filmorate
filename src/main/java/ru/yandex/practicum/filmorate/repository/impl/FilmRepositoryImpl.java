@@ -144,6 +144,7 @@ public class FilmRepositoryImpl implements FilmRepository {
                 + "ON f.id = fg.film_id WHERE fg.genre_id = :genreId AND EXTRACT(YEAR FROM f.release_date) = :year "
                 + "GROUP BY f.id ORDER BY AVG(fl.grade) DESC LIMIT :count ";
         var params = new MapSqlParameterSource();
+
         params.addValue("count", count);
         if (genreId != null && year == null) {
             params.addValue("genreId", genreId);
@@ -192,21 +193,23 @@ public class FilmRepositoryImpl implements FilmRepository {
         String sqlPopularFilms = "SELECT f.id, f.name, f.description,f.release_date, f.duration, f.rating_id "
                 + "FROM film AS f LEFT JOIN film_like AS fl ON fl.film_id = f.id GROUP BY f.id "
                 + "ORDER BY AVG(fl.grade) DESC LIMIT :count ";
-        String sqlGetFilmsSearchInTitle = "SELECT film.id, film.name, film.description, film.release_date, "
-                + "film.duration, film.rating_id FROM public.film LEFT JOIN public.film_like AS fl "
-                + "ON film.id = fl.film_id WHERE LOWER(film.name) LIKE CONCAT('%', :query, '%') GROUP BY film.id "
-                + "ORDER BY AVG(fl.grade) DESC";
-        String sqlGetFilmsSearchInDirector = "SELECT film.id, film.name, film.description, film.release_date, "
-                + "film.duration, film.rating_id FROM public.film LEFT JOIN public.film_like AS fl "
-                + "ON film.id = fl.film_id WHERE film.id IN (SELECT fd.film_id FROM public.director "
-                + "LEFT JOIN public.film_director AS fd ON fd.director_id = director.id WHERE LOWER(director.name) "
-                + "LIKE CONCAT('%', :query, '%')) GROUP BY film.id ORDER BY AVG(fl.grade) DESC";
-        String sqlGetFilmsSearchInDirectorAndTitle = "SELECT film.* FROM film LEFT JOIN film_like AS fl "
-                + "ON film.id = fl.film_id WHERE film.id IN (SELECT fd.film_id FROM director LEFT JOIN film_director fd "
-                + "ON fd.director_id = director.id WHERE LOWER(director.name) LIKE CONCAT('%', :query, '%')) "
-                + "OR LOWER(film.name) LIKE CONCAT('%', :query, '%') GROUP BY film.id "
-                + "ORDER BY COUNT(fl.liked_person_id) DESC";
+        String sqlGetFilmsSearchInTitle = "SELECT f.id, f.name, f.description, f.release_date, f.duration, f.rating_id "
+                + "FROM film AS f LEFT JOIN "
+                + "(SELECT film_id, AVG(fl.grade) FROM film_like AS fl GROUP BY film_id) "
+                + "AS t ON f.id = t.film_id "
+                + "WHERE LOWER(f.name) LIKE CONCAT('%', :query, '%')";
+        String sqlGetFilmsSearchInDirector = "SELECT f.id, f.name, f.description, f.release_date, f.duration, "
+                + "f.rating_id FROM film f LEFT JOIN "
+                + "(SELECT film_id, AVG(fl.grade) FROM film_like AS fl GROUP BY film_id) AS t ON f.id = t.film_id "
+                + "LEFT JOIN film_director AS fd ON f.id = fd.film_id "
+                + "LEFT JOIN director AS d ON fd.director_id = d.id "
+                + "WHERE LOWER(d.name) LIKE CONCAT('%', :query, '%')";
+        String sqlGetFilmsSearchInDirectorAndTitle = sqlGetFilmsSearchInDirector + " UNION " + sqlGetFilmsSearchInTitle
+                + " ORDER BY id DESC ";
+        String sqlGetFilmsSearchInTitleAndDirector = sqlGetFilmsSearchInTitle + " UNION " + sqlGetFilmsSearchInDirector
+                + " ORDER BY id DESC ";
         var params = new MapSqlParameterSource();
+
         params.addValue("query", query.toLowerCase());
         SearchType type = SearchType.of(by);
         switch (type) {
@@ -215,6 +218,7 @@ public class FilmRepositoryImpl implements FilmRepository {
             case TITLE:
                 return jdbcTemplate.query(sqlGetFilmsSearchInTitle, params, filmMapper);
             case TITLE_DIRECTOR:
+                return jdbcTemplate.query(sqlGetFilmsSearchInTitleAndDirector, params, filmMapper);
             case DIRECTOR_TITLE:
                 return jdbcTemplate.query(sqlGetFilmsSearchInDirectorAndTitle, params, filmMapper);
             default:
@@ -233,6 +237,7 @@ public class FilmRepositoryImpl implements FilmRepository {
                 + "WHERE f.id IN (SELECT d.film_id FROM public.film_director AS d WHERE d.director_id = :director_id )"
                 + "GROUP BY f.id ORDER BY AVG(l.grade) DESC";
         var params = new MapSqlParameterSource();
+
         params.addValue("director_id", id);
         List<Film> films = new ArrayList<>(jdbcTemplate.query(sqlGetFilmsByDirectorId, params, filmMapper));
 

@@ -1,17 +1,13 @@
 package ru.yandex.practicum.filmorate.repository;
 
 import lombok.RequiredArgsConstructor;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.repository.impl.FilmRepositoryImpl;
 import ru.yandex.practicum.filmorate.repository.impl.UserRepositoryImpl;
-import ru.yandex.practicum.filmorate.service.RatingService;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -22,56 +18,49 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
+@DisplayName("Testing UserRepository class")
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class UserRepositoryTest {
 
     private final UserRepositoryImpl userRepository;
-    private final FilmRepositoryImpl filmRepository;
-    private final RatingService ratingService;
-
-    private static final String EMAIL = "ivan@ya.ru";
-    private static final String LOGIN = "iwwwwan";
-    private static final String NAME = "Ivan Ivanov";
 
     @Test
-    @Order(1)
+    @DisplayName("Testing insert user")
     void insertUser() {
         User user = userRepository.insertUser(User.builder()
-                .email(EMAIL)
-                .login(LOGIN)
-                .name(NAME)
+                .email("ivan@mail.com")
+                .login("van")
+                .name("Ivan")
                 .birthday(LocalDate.of(2000, 9, 10))
                 .build());
 
         assertNotNull(user.getId());
-        assertEquals(EMAIL, user.getEmail());
-        assertEquals(LOGIN, user.getLogin());
-        assertEquals(NAME, user.getName());
+        assertEquals("ivan@mail.com", user.getEmail());
+        assertEquals("van", user.getLogin());
+        assertEquals("Ivan", user.getName());
     }
 
     @Test
-    @Order(2)
+    @DisplayName("Testing update user")
     void updateUser() {
-        String updLogin = "iwwanUPD";
-
         User user = userRepository.updateUser(User.builder()
                 .id(1)
-                .email(EMAIL)
-                .login(updLogin)
-                .name(NAME)
-                .birthday(LocalDate.of(2000, 9, 10))
+                .email("tess@mail.com")
+                .login("tessa")
+                .name("Tess")
+                .birthday(LocalDate.of(2000, 10, 10))
                 .build());
 
         assertEquals(1, user.getId());
-        assertEquals(updLogin, user.getLogin());
-        assertEquals(EMAIL, user.getEmail());
-        assertEquals(NAME, user.getName());
+        assertEquals("tessa", user.getLogin());
+        assertEquals("tess@mail.com", user.getEmail());
+        assertEquals("Tess", user.getName());
     }
 
     @Test
-    @Order(3)
+    @DisplayName("Testing get all users")
     void getAllUsers() {
         List<User> users = userRepository.getAllUsers();
 
@@ -79,7 +68,7 @@ class UserRepositoryTest {
     }
 
     @Test
-    @Order(4)
+    @DisplayName("Testing get user by id")
     void getUserById() {
         Optional<User> userOptional = userRepository.getUserById(1);
 
@@ -91,23 +80,16 @@ class UserRepositoryTest {
     }
 
     @Test
-    @Order(5)
+    @DisplayName("Testing add friend to user")
     void addFriend() {
-        User friend = userRepository.insertUser(User.builder()
-                .email("friend@email.com")
-                .login("friend")
-                .name("Friend")
-                .birthday(LocalDate.of(2000, 10, 10))
-                .build());
-
-        User user = userRepository.addFriend(1, friend.getId());
+        User user = userRepository.addFriend(5, 1);
 
         assertEquals(1, user.getFriends().size());
-        assertTrue(user.getFriends().stream().anyMatch(fr -> Objects.equals(fr.getId(), friend.getId())));
+        assertTrue(user.getFriends().stream().anyMatch(fr -> Objects.equals(fr.getId(), 1)));
     }
 
     @Test
-    @Order(6)
+    @DisplayName("Testing get all friends")
     void getAllFriends() {
         List<User> friends = userRepository.getAllFriends(1);
 
@@ -115,34 +97,40 @@ class UserRepositoryTest {
     }
 
     @Test
-    @Order(7)
+    @DisplayName("Testing get common friends")
     void getCommonFriends() {
-        User common = userRepository.insertUser(User.builder()
-                .email("common@email.com")
-                .login("common")
-                .name("Common")
-                .birthday(LocalDate.of(2001, 10, 10))
-                .build());
-        User user = userRepository.addFriend(common.getId(), 2);
-
-        List<User> commonFriends = userRepository.getCommonFriends(user.getId(), 1);
+        List<User> commonFriends = userRepository.getCommonFriends(1, 3);
 
         assertNotNull(commonFriends);
     }
 
     @Test
-    @Order(8)
+    @DisplayName("Testing delete friend")
     void deleteFriend() {
-        List<User> users = userRepository.getAllFriends(1);
+        List<User> users = userRepository.getAllFriends(4);
         Integer friendId = users.get(0).getId();
-        User user = userRepository.deleteFriend(1, friendId);
+        User user = userRepository.deleteFriend(4, friendId);
 
         assertEquals(0, user.getFriends().size());
         assertTrue(user.getFriends().stream().noneMatch(friend -> Objects.equals(friend.getId(), friendId)));
     }
 
     @Test
-    @Order(9)
+    @DisplayName("Testing recommendation films for user")
+    void getRecommendation() {
+        List<Film> films = userRepository.getRecommendations(2);
+        assertNotNull(films);
+
+        Film film = films.get(0);
+        assertEquals(2, film.getId());
+
+        List<Film> emptyFilms = userRepository.getRecommendations(3);
+        assertNotNull(emptyFilms);
+        assertEquals(emptyFilms.size(), 0);
+    }
+
+    @Test
+    @DisplayName("Testing user exist")
     void doesExist() {
         assertTrue(userRepository.doesExist(1));
     }
