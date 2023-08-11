@@ -19,17 +19,14 @@ public class FriendRepositoryImpl implements FriendRepository {
 
     private final FriendMapper friendMapper;
 
-    private static final String SQL_GET_FRIENDS_BY_USER_ID = "SELECT friend_id, is_confirmed FROM public.friendship "
-            + "WHERE person_id = :id "
-            + "UNION "
-            + "SELECT person_id, is_confirmed FROM public.friendship "
-            + "WHERE friend_id = :id AND is_confirmed = true";
-
     @Override
     public Set<Friend> getFriendsByUserId(Integer id) {
+        String sqlGetFriendsByUserId = "SELECT friend_id, is_confirmed FROM public.friendship "
+                + "WHERE person_id = :id UNION SELECT person_id, is_confirmed FROM public.friendship "
+                + "WHERE friend_id = :id AND is_confirmed = true";
         var params = new MapSqlParameterSource();
 
         params.addValue("id", id);
-        return new HashSet<>(jdbcTemplate.query(SQL_GET_FRIENDS_BY_USER_ID, params, friendMapper));
+        return new HashSet<>(jdbcTemplate.query(sqlGetFriendsByUserId, params, friendMapper));
     }
 }

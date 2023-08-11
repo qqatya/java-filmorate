@@ -1,17 +1,15 @@
 package ru.yandex.practicum.filmorate.repository;
 
 import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.repository.impl.FilmRepositoryImpl;
-import ru.yandex.practicum.filmorate.repository.impl.UserRepositoryImpl;
 import ru.yandex.practicum.filmorate.service.RatingService;
 
 import java.time.LocalDate;
@@ -22,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
+@DisplayName("Testing FilmRepository class")
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @TestMethodOrder(OrderAnnotation.class)
@@ -30,58 +29,45 @@ class FilmRepositoryTest {
     private final FilmRepositoryImpl filmRepository;
     private final RatingService ratingService;
 
-    private final UserRepositoryImpl userRepository;
-
-    private static final String DESCRIPTION = "Shutter Island is a 2010 American neo-noir psychological thriller film "
-            + "directed by Martin Scorsese";
-
-    private static final Long DURATION = 139L;
-    private static final LocalDate RELEASE_DATE = LocalDate.of(2010, 2, 19);
-
     @Test
-    @Order(1)
+    @DisplayName("Testing insert film")
     void insertFilm() {
-        String name = "Shutter Island";
-
         Film film = filmRepository.insertFilm(Film.builder()
-                .id(1)
-                .name(name)
-                .description(DESCRIPTION)
-                .releaseDate(RELEASE_DATE)
-                .duration(DURATION)
-                .mpa(ratingService.getRatingById(1))
+                .name("Joker")
+                .description("d".repeat(100))
+                .releaseDate(LocalDate.of(2019, 10, 9))
+                .duration(122L)
+                .mpa(ratingService.getRatingById(5))
                 .build());
 
-        assertTrue(film.getId() == 1 || film.getId() == 2);
-        assertEquals(name, film.getName());
-        assertEquals(DESCRIPTION, film.getDescription());
-        assertEquals(DURATION, film.getDuration());
-        assertEquals(RELEASE_DATE, film.getReleaseDate());
+        assertNotNull(film.getId());
+        assertEquals("Joker", film.getName());
+        assertEquals("d".repeat(100), film.getDescription());
+        assertEquals(122L, film.getDuration());
+        assertEquals(LocalDate.of(2019, 10, 9), film.getReleaseDate());
     }
 
     @Test
-    @Order(2)
+    @DisplayName("Testing update film")
     void updateFilm() {
-        String name = "Shutter Island UPD";
-
         Film film = filmRepository.updateFilm(Film.builder()
                 .id(1)
-                .name(name)
-                .description(DESCRIPTION)
-                .releaseDate(RELEASE_DATE)
-                .duration(DURATION)
+                .name("Leon")
+                .description("About killer")
+                .releaseDate(LocalDate.of(1984, 12, 14))
+                .duration(120L)
                 .mpa(ratingService.getRatingById(1))
                 .build());
 
         assertEquals(1, film.getId());
-        assertEquals(name, film.getName());
-        assertEquals(DESCRIPTION, film.getDescription());
-        assertEquals(DURATION, film.getDuration());
-        assertEquals(RELEASE_DATE, film.getReleaseDate());
+        assertEquals("Leon", film.getName());
+        assertEquals("About killer", film.getDescription());
+        assertEquals(120L, film.getDuration());
+        assertEquals(LocalDate.of(1984, 12, 14), film.getReleaseDate());
     }
 
     @Test
-    @Order(3)
+    @DisplayName("Testing get all films")
     void getAllFilms() {
         List<Film> films = filmRepository.getAllFilms();
 
@@ -89,7 +75,7 @@ class FilmRepositoryTest {
     }
 
     @Test
-    @Order(4)
+    @DisplayName("Testing get film by id")
     void getFilmById() {
         Optional<Film> filmOptional = filmRepository.getFilmById(1);
 
@@ -101,50 +87,62 @@ class FilmRepositoryTest {
     }
 
     @Test
-    @Order(5)
+    @DisplayName("Testing put like to film")
     void putLike() {
-        User user = userRepository.insertUser(User.builder()
-                .email("ivan@ya.ru")
-                .login("iwwwwan")
-                .name("Ivan Ivanov")
-                .birthday(LocalDate.of(2000, 9, 10))
-                .build());
+        Film film = filmRepository.putLike(6, 6, 6);
 
-        Film film = filmRepository.putLike(1, user.getId());
-
-        assertTrue(film.getUsersLiked().contains(user.getId()));
+        assertTrue(film.getUsersLiked().contains(6));
 
     }
 
     @Test
-    @Order(6)
+    @DisplayName("Testing get popular films")
     void getPopularFilms() {
-        String name = "Shutter Island";
+        List<Film> films = filmRepository.getPopularFilms(2, 2, 2023);
+        Film topFilm = films.get(0);
 
-        Film film = filmRepository.insertFilm(Film.builder()
-                .id(1)
-                .name(name)
-                .description(DESCRIPTION)
-                .releaseDate(RELEASE_DATE)
-                .duration(DURATION)
-                .mpa(ratingService.getRatingById(1))
-                .build());
-
-        List<Film> films = filmRepository.getPopularFilms(1, null, 2010);
-
-        assertEquals(1, films.size());
+        assertNotNull(films);
+        assertEquals(2, films.size());
+        assertEquals(5, topFilm.getId());
     }
 
     @Test
-    @Order(7)
+    @DisplayName("Testing search")
+    void search() {
+        List<Film> byTitle = filmRepository.searchFilms("fRoZen", "title");
+        Film filmT = byTitle.get(0);
+
+        assertEquals(1, byTitle.size());
+        assertEquals(4, filmT.getId());
+
+        List<Film> byDirector = filmRepository.searchFilms("TOM", "director");
+        Film filmD = byDirector.get(0);
+        assertEquals(1, byDirector.size());
+        assertEquals(1, filmD.getId());
+
+        List<Film> byTitleDirector = filmRepository.searchFilms("lAnd", "title,director");
+        Film filmTD = byTitleDirector.get(0);
+
+        assertEquals(2, byTitleDirector.size());
+        assertEquals(2, filmTD.getId());
+
+        List<Film> byDirectorTitle = filmRepository.searchFilms("LeOn", "director,title");
+        Film filmDT = byDirectorTitle.get(0);
+
+        assertEquals(2, byDirectorTitle.size());
+        assertEquals(5, filmDT.getId());
+    }
+
+    @Test
+    @DisplayName("Testing delete like")
     void deleteLike() {
-        Film film = filmRepository.deleteLike(1, 1);
+        Film film = filmRepository.deleteLike(3, 5);
 
         assertEquals(0, film.getUsersLiked().size());
     }
 
     @Test
-    @Order(8)
+    @DisplayName("Testing film exist")
     void doesExist() {
         assertTrue(filmRepository.doesExist(1));
     }

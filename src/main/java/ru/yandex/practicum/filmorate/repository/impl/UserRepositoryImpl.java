@@ -7,8 +7,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
-import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.mapper.UserMapper;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Friend;
@@ -19,6 +18,9 @@ import ru.yandex.practicum.filmorate.repository.UserRepository;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static ru.yandex.practicum.filmorate.model.type.ExceptionType.FILM_NOT_FOUND;
+import static ru.yandex.practicum.filmorate.model.type.ExceptionType.USER_NOT_FOUND;
 
 @Repository
 @Slf4j
@@ -33,113 +35,93 @@ public class UserRepositoryImpl implements UserRepository {
 
     private final FriendRepository friendRepository;
 
-    private static final String SQL_INSERT_USER = "INSERT INTO public.person "
-            + "(email, login, name, birthday) VALUES(:email, :login, :name, :birthday)";
-
-    private static final String SQL_UPDATE_USER = "UPDATE public.person SET email = :email, login = :login, "
-            + "name = :name, birthday = :birthday where id = :id";
-
-    private static final String SQL_GET_USER_BY_ID = "SELECT id, email, login, name, birthday FROM public.person "
-            + "WHERE id = :id";
-
-    private static final String SQL_GET_ALL_USERS = "SELECT id, email, login, name, birthday FROM public.person";
-
-    private static final String SQL_INSERT_FRIEND = "INSERT INTO public.friendship (person_id, friend_id, is_confirmed) "
-            + "VALUES (:person_id, :friend_id, :is_confirmed)";
-
-    private static final String SQL_CONFIRM_FRIENDSHIP = "UPDATE public.friendship SET is_confirmed = true "
-            + "WHERE (person_id = :person_id AND friend_id = :friend_id) "
-            + "OR (person_id = :friend_id AND friend_id = :person_id)";
-
-    private static final String SQL_DELETE_FRIEND = "DELETE FROM public.friendship "
-            + "WHERE (person_id = :person_id AND friend_id = :friend_id) "
-            + "OR (person_id = :friend_id AND friend_id = :person_id and is_confirmed = true)";
-
-    private static final String SQL_DELETE_USER_BY_ID = "DELETE FROM public.person WHERE id = :id";
-
-    private static final String SQL_GET_SIMILAR_USER = "SELECT l.liked_person_id FROM public.film_like AS l " +
-            "WHERE l.film_id IN " +
-            "(SELECT l2.film_id FROM public.film_like AS l2 WHERE l2.liked_person_id = :id) " +
-            "AND l.liked_person_id != :id " +
-            "GROUP BY l.liked_person_id " +
-            "ORDER BY COUNT(l.film_id) DESC LIMIT 1";
-
-    private static final String SQL_GET_RECOMMENDATIONS = "SELECT l.film_id FROM public.film_like AS l " +
-            "WHERE l.liked_person_id = :other_id AND l.film_id NOT IN " +
-            "(SELECT l2.film_id FROM public.film_like AS l2 WHERE l2.liked_person_id = :id)";
-
     @Override
     public User insertUser(User user) {
+        String sqlInsertUser = "INSERT INTO public.person (email, login, name, birthday) "
+                + "VALUES(:email, :login, :name, :birthday)";
         log.info("Creating user with id = {}", user.getId());
         MapSqlParameterSource params = getParams(user);
         KeyHolder holder = new GeneratedKeyHolder();
 
-        jdbcTemplate.update(SQL_INSERT_USER, params, holder);
+        jdbcTemplate.update(sqlInsertUser, params, holder);
         Integer userId = holder.getKey().intValue();
 
-        return getUserById(userId).orElseThrow(() -> new UserNotFoundException(String.valueOf(userId)));
+        return getUserById(userId).orElseThrow(() -> new NotFoundException(USER_NOT_FOUND.getValue() + userId));
     }
 
     @Override
     public User updateUser(User user) {
+        String sqlUpdateUser = "UPDATE public.person SET email = :email, login = :login, name = :name, "
+                + "birthday = :birthday where id = :id";
         KeyHolder holder = new GeneratedKeyHolder();
 
         if (getUserById(user.getId()).isPresent()) {
             MapSqlParameterSource params = getParams(user);
 
             params.addValue("id", user.getId());
-            jdbcTemplate.update(SQL_UPDATE_USER, params, holder);
+            jdbcTemplate.update(sqlUpdateUser, params, holder);
         }
         Integer userId = holder.getKey().intValue();
 
-        return getUserById(userId).orElseThrow(() -> new UserNotFoundException(String.valueOf(userId)));
+        return getUserById(userId).orElseThrow(() -> new NotFoundException(USER_NOT_FOUND.getValue() + userId));
     }
 
     @Override
     public List<User> getAllUsers() {
-        return jdbcTemplate.query(SQL_GET_ALL_USERS, userMapper);
+        String sqlGetAllUsers = "SELECT id, email, login, name, birthday FROM public.person";
+
+        return jdbcTemplate.query(sqlGetAllUsers, userMapper);
     }
 
     @Override
     public Optional<User> getUserById(Integer id) {
+        String sqlGetUserById = "SELECT id, email, login, name, birthday FROM public.person WHERE id = :id";
         var params = new MapSqlParameterSource();
 
         params.addValue("id", id);
-        return jdbcTemplate.query(SQL_GET_USER_BY_ID, params, userMapper).stream().findFirst();
+        return jdbcTemplate.query(sqlGetUserById, params, userMapper).stream().findFirst();
     }
 
     @Override
     public User addFriend(Integer userId, Integer friendId) {
+        String sqlInsertFriend = "INSERT INTO public.friendship (person_id, friend_id, is_confirmed) "
+                + "VALUES (:person_id, :friend_id, :is_confirmed)";
+        String sqlConfirmFriendship = "UPDATE public.friendship SET is_confirmed = true "
+                + "WHERE (person_id = :person_id AND friend_id = :friend_id) "
+                + "OR (person_id = :friend_id AND friend_id = :person_id)";
         Set<Friend> friends = friendRepository.getFriendsByUserId(userId);
         var params = new MapSqlParameterSource();
 
         params.addValue("person_id", userId);
         params.addValue("friend_id", friendId);
         if (friends.stream().anyMatch(friend -> friend.getId().equals(friendId) && !friend.getIsConfirmed())) {
-            jdbcTemplate.update(SQL_CONFIRM_FRIENDSHIP, params);
+            jdbcTemplate.update(sqlConfirmFriendship, params);
         }
         if (friends.stream().noneMatch(friend -> friend.getId().equals(friendId))) {
             params.addValue("is_confirmed", false);
-            jdbcTemplate.update(SQL_INSERT_FRIEND, params);
+            jdbcTemplate.update(sqlInsertFriend, params);
         }
-        return getUserById(userId).orElseThrow(() -> new UserNotFoundException(String.valueOf(userId)));
+        return getUserById(userId).orElseThrow(() -> new NotFoundException(USER_NOT_FOUND.getValue() + userId));
     }
 
     @Override
     public User deleteFriend(Integer userId, Integer friendId) {
+        String sqlDeleteFriend = "DELETE FROM public.friendship "
+                + "WHERE (person_id = :person_id AND friend_id = :friend_id) "
+                + "OR (person_id = :friend_id AND friend_id = :person_id and is_confirmed = true)";
         var params = new MapSqlParameterSource();
 
         params.addValue("person_id", userId);
         params.addValue("friend_id", friendId);
-        jdbcTemplate.update(SQL_DELETE_FRIEND, params);
-        return getUserById(userId).orElseThrow(() -> new UserNotFoundException(String.valueOf(userId)));
+        jdbcTemplate.update(sqlDeleteFriend, params);
+        return getUserById(userId).orElseThrow(() -> new NotFoundException(USER_NOT_FOUND.getValue() + userId));
     }
 
     @Override
     public List<User> getAllFriends(Integer id) {
         return friendRepository.getFriendsByUserId(id).stream()
                 .map(friend -> getUserById(friend.getId())
-                        .orElseThrow(() -> new UserNotFoundException(String.valueOf(friend.getId()))))
+                        .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND.getValue() + friend.getId())))
                 .collect(Collectors.toList());
     }
 
@@ -160,7 +142,7 @@ public class UserRepositoryImpl implements UserRepository {
         log.debug("Common friends list: {}", result);
         return result.stream()
                 .map(friendId -> getUserById(friendId)
-                        .orElseThrow(() -> new UserNotFoundException(String.valueOf(friendId))))
+                        .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND.getValue() + friendId)))
                 .collect(Collectors.toList());
     }
 
@@ -171,14 +153,18 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public void deleteUserById(Integer id) {
+        String sqlDeleteUserById = "DELETE FROM public.person WHERE id = :id";
         var params = new MapSqlParameterSource();
 
         params.addValue("id", id);
-        jdbcTemplate.update(SQL_DELETE_USER_BY_ID, params);
+        jdbcTemplate.update(sqlDeleteUserById, params);
     }
 
     @Override
     public List<Film> getRecommendations(Integer id) {
+        String sqlGetRecommendations = "SELECT l.film_id FROM public.film_like AS l "
+                + "WHERE l.grade BETWEEN 6 AND 10 AND l.liked_person_id = :other_id AND l.film_id NOT IN "
+                + "(SELECT l2.film_id FROM public.film_like AS l2 WHERE l2.liked_person_id = :id)";
         var params = new MapSqlParameterSource();
         Optional<Integer> otherId = getSimilarUserId(id);
         if (otherId.isEmpty()) {
@@ -186,15 +172,20 @@ public class UserRepositoryImpl implements UserRepository {
         }
         params.addValue("id", id);
         params.addValue("other_id", otherId.get());
-        List<Integer> filmId = jdbcTemplate.queryForList(SQL_GET_RECOMMENDATIONS, params, Integer.class);
+        List<Integer> filmId = jdbcTemplate.queryForList(sqlGetRecommendations, params, Integer.class);
         return filmId.stream()
                 .filter(i -> filmRepository.getFilmById(i).isPresent())
-                .map(i -> filmRepository.getFilmById(i).orElseThrow(() -> new FilmNotFoundException(String.valueOf(i))))
+                .map(i -> filmRepository.getFilmById(i)
+                        .orElseThrow(() -> new NotFoundException(FILM_NOT_FOUND.getValue() + i)))
                 .collect(Collectors.toList());
     }
 
     private Optional<Integer> getSimilarUserId(Integer id) {
-        List<Integer> ids = jdbcTemplate.queryForList(SQL_GET_SIMILAR_USER, Map.of("id", id), Integer.class);
+        String sqlGetSimilarUser = "SELECT l.liked_person_id FROM public.film_like AS l "
+                + "LEFT JOIN public.film_like AS l2 ON l.film_id = l2.film_id WHERE l.grade = l2.grade "
+                + "AND l.liked_person_id != :id AND l2.liked_person_id = :id AND l.grade > 5 "
+                + "GROUP BY l.liked_person_id ORDER BY COUNT(l.film_id) DESC LIMIT 1";
+        List<Integer> ids = jdbcTemplate.queryForList(sqlGetSimilarUser, Map.of("id", id), Integer.class);
         if (ids.size() != 1) {
             return Optional.empty();
         }

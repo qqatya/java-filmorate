@@ -28,86 +28,16 @@ public class ErrorController extends ResponseEntityExceptionHandler {
     }
 
     /**
-     * Обработчик UserNotFoundException
+     * Обработчик NotFoundException
      *
      * @param e Эксепшн
      * @return Объект, содержащий сообщение об ошибке
      */
-    @ExceptionHandler(UserNotFoundException.class)
+    @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ResponseBody
-    public ErrorInfo processUserNotFoundException(UserNotFoundException e) {
-        log.debug("Can not find user: {}", e.getMessage());
-        return new ErrorInfo(e.getMessage());
-    }
-
-    /**
-     * Обработчик FilmNotFoundException
-     *
-     * @param e Эксепшн
-     * @return Объект, содержащий сообщение об ошибке
-     */
-    @ExceptionHandler(FilmNotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    @ResponseBody
-    public ErrorInfo processFilmNotFoundException(FilmNotFoundException e) {
-        log.debug("Can not find film: {}", e.getMessage());
-        return new ErrorInfo(e.getMessage());
-    }
-
-    /**
-     * Обработчик RatingNotFoundException
-     *
-     * @param e Эксепшн
-     * @return Объект, содержащий сообщение об ошибке
-     */
-    @ExceptionHandler(RatingNotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    @ResponseBody
-    public ErrorInfo processRatingNotFoundException(RatingNotFoundException e) {
-        log.debug("Can not find rating: {}", e.getMessage());
-        return new ErrorInfo(e.getMessage());
-    }
-
-    /**
-     * Обработчик GenreNotFoundException
-     *
-     * @param e Эксепшн
-     * @return Объект, содержащий сообщение об ошибке
-     */
-    @ExceptionHandler(GenreNotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    @ResponseBody
-    public ErrorInfo processGenreNotFoundException(GenreNotFoundException e) {
-        log.debug("Can not find genre: {}", e.getMessage());
-        return new ErrorInfo(e.getMessage());
-    }
-
-    /**
-     * Обработчик DirectorNotFoundException
-     *
-     * @param e Эксепшн
-     * @return Объект, содержащий сообщение об ошибке
-     */
-    @ExceptionHandler(DirectorNotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    @ResponseBody
-    public ErrorInfo processDirectorNotFoundException(DirectorNotFoundException e) {
-        log.debug("Can not find director: {}", e.getMessage());
-        return new ErrorInfo(e.getMessage());
-    }
-
-    /**
-     * Обработчик ReviewNotFoundException
-     *
-     * @param e Эксепшн
-     * @return Объект, содержащий сообщение об ошибке
-     */
-    @ExceptionHandler(ReviewNotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    @ResponseBody
-    public ErrorInfo processReviewNotFoundException(ReviewNotFoundException e) {
-        log.debug("Can not find review: {}", e.getMessage());
+    public ErrorInfo processNotFoundException(NotFoundException e) {
+        log.debug(e.getMessage());
         return new ErrorInfo(e.getMessage());
     }
 
@@ -126,29 +56,15 @@ public class ErrorController extends ResponseEntityExceptionHandler {
     }
 
     /**
-     * Обработчик EventNotFoundException
-     *
-     * @param e Эксепшн
-     * @return Объект, содержащий сообщение об ошибке
-     */
-    @ExceptionHandler(EventNotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    @ResponseBody
-    public ErrorInfo processEventNotFoundException(EventNotFoundException e) {
-        log.debug("Can not find event: {}", e.getMessage());
-        return new ErrorInfo(e.getMessage());
-    }
-
-    /**
      * Обработчик непредвиденных ошибок
      *
      * @param e Эксепшн
      * @return Объект, содержащий сообщение об ошибке
      */
-    @ExceptionHandler(RuntimeException.class)
+    @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ResponseBody
-    public ErrorInfo processException(RuntimeException e) {
+    public ErrorInfo processException(Exception e) {
         log.error("Unexpected error: ", e);
         return new ErrorInfo(e.getMessage());
     }

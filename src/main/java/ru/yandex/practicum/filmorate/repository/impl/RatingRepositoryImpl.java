@@ -18,32 +18,29 @@ public class RatingRepositoryImpl implements RatingRepository {
 
     private final RatingMapper ratingMapper;
 
-    private static final String SQL_GET_RATING_BY_FILM_ID = "SELECT id, name FROM public.rating "
-            + "WHERE id = (SELECT rating_id FROM public.film where id = :id)";
-
-    private static final String SQL_GET_ALL_RATINGS = "SELECT id, name FROM public.rating";
-
-    private static final String SQL_GET_RATING_BY_ID = "SELECT id, name FROM public.rating WHERE id = :id";
-
-
     @Override
     public Optional<Rating> getByFilmId(Integer id) {
+        String sqlGetRatingByFilmId = "SELECT id, name FROM public.rating "
+                + "WHERE id = (SELECT rating_id FROM public.film where id = :id)";
         var params = new MapSqlParameterSource();
 
         params.addValue("id", id);
-        return jdbcTemplate.query(SQL_GET_RATING_BY_FILM_ID, params, ratingMapper).stream().findFirst();
+        return jdbcTemplate.query(sqlGetRatingByFilmId, params, ratingMapper).stream().findFirst();
     }
 
     @Override
     public List<Rating> getAllRatings() {
-        return jdbcTemplate.query(SQL_GET_ALL_RATINGS, ratingMapper);
+        String sqlGetAllRatings = "SELECT id, name FROM public.rating";
+
+        return jdbcTemplate.query(sqlGetAllRatings, ratingMapper);
     }
 
     @Override
     public Optional<Rating> getRatingById(Integer id) {
+        String sqlGetRatingById = "SELECT id, name FROM public.rating WHERE id = :id";
         var params = new MapSqlParameterSource();
 
         params.addValue("id", id);
-        return jdbcTemplate.query(SQL_GET_RATING_BY_ID, params, ratingMapper).stream().findFirst();
+        return jdbcTemplate.query(sqlGetRatingById, params, ratingMapper).stream().findFirst();
     }
 }

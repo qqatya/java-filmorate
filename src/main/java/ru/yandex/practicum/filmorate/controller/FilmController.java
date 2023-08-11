@@ -6,6 +6,8 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import java.util.List;
 
 @RestController
@@ -62,12 +64,14 @@ public class FilmController {
      *
      * @param id     Идентификатор фильма
      * @param userId Идентификатор пользователя
+     * @param grade  Оценка фильма
      * @return Фильм с обновленным списком лайков
      */
     @PutMapping("/{id}/like/{userId}")
     public Film putLike(@PathVariable Integer id,
-                        @PathVariable Integer userId) {
-        return filmService.putLike(id, userId);
+                        @PathVariable Integer userId,
+                        @RequestParam(defaultValue = "6") @Min(1) @Max(10) Integer grade) {
+        return filmService.putLike(id, userId, grade);
     }
 
     /**

@@ -17,38 +17,24 @@ import java.util.stream.Collectors;
 @Repository
 @RequiredArgsConstructor
 public class GenreRepositoryImpl implements GenreRepository {
+
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
     private final GenreMapper genreMapper;
 
-    private static final String SQL_GET_GENRE_BY_FILM_ID = "SELECT id, name FROM public.genre WHERE id in "
-            + "(SELECT genre_id from film_genre WHERE film_id = :id)";
-
-    private static final String SQL_INSERT_FILM_GENRE = "INSERT INTO public.film_genre (film_id, genre_id) "
-            + "VALUES (:id, :genre_id)";
-
-    private static final String SQL_UPDATE_FILM_GENRE = "UPDATE public.film_genre SET genre_id = :genre_id "
-            + "WHERE film_id = :id AND genre_id = :genre_id";
-
-    private static final String SQL_DELETE_FILM_GENRES = "DELETE FROM public.film_genre WHERE film_id = :id";
-
-    private static final String SQL_DELETE_FILM_GENRE_BY_ID = "DELETE FROM public.film_genre WHERE film_id = :id "
-            + "AND genre_id = :genre_id";
-
-    private static final String SQL_GET_ALL_GENRES = "SELECT id, name FROM public.genre";
-
-    private static final String SQL_GET_GENRE_BY_ID = "SELECT id, name FROM public.genre WHERE id = :id";
-
     @Override
     public Set<Genre> getByFilmId(Integer id) {
+        String sqlGetGenreByFilmId = "SELECT id, name FROM public.genre WHERE id IN "
+                + "(SELECT genre_id FROM film_genre WHERE film_id = :id)";
         var params = new MapSqlParameterSource();
 
         params.addValue("id", id);
-        return new HashSet<>(jdbcTemplate.query(SQL_GET_GENRE_BY_FILM_ID, params, genreMapper));
+        return new HashSet<>(jdbcTemplate.query(sqlGetGenreByFilmId, params, genreMapper));
     }
 
     @Override
     public Set<Genre> insertFilmGenres(Set<Genre> genres, Integer filmId) {
+        String sqlInsertFilmGenre = "INSERT INTO public.film_genre (film_id, genre_id) VALUES (:id, :genre_id)";
         List<Integer> genreIds = genres.stream()
                 .map(Genre::getId)
                 .collect(Collectors.toList());
@@ -57,13 +43,17 @@ public class GenreRepositoryImpl implements GenreRepository {
         params.addValue("id", filmId);
         for (Integer genreId : genreIds) {
             params.addValue("genre_id", genreId);
-            jdbcTemplate.update(SQL_INSERT_FILM_GENRE, params);
+            jdbcTemplate.update(sqlInsertFilmGenre, params);
         }
-        return new HashSet<>(jdbcTemplate.query(SQL_GET_GENRE_BY_FILM_ID, params, genreMapper));
+        return getByFilmId(filmId);
     }
 
     @Override
     public Set<Genre> updateFilmGenres(Set<Genre> genres, Integer filmId) {
+        String sqlInsertFilmGenre = "INSERT INTO public.film_genre (film_id, genre_id) VALUES (:id, :genre_id)";
+        String sqlUpdateFilmGenre = "UPDATE public.film_genre SET genre_id = :genre_id WHERE film_id = :id "
+                + "AND genre_id = :genre_id";
+        String sqlDeleteFilmGenreById = "DELETE FROM public.film_genre WHERE film_id = :id AND genre_id = :genre_id";
         Set<Integer> existingGenresIds = getByFilmId(filmId).stream()
                 .map(Genre::getId)
                 .collect(Collectors.toSet());
@@ -76,38 +66,42 @@ public class GenreRepositoryImpl implements GenreRepository {
         for (Integer genreId : genreIds) {
             params.addValue("genre_id", genreId);
             if (existingGenresIds.stream().anyMatch(existingId -> existingId.equals(genreId))) {
-                jdbcTemplate.update(SQL_UPDATE_FILM_GENRE, params);
+                jdbcTemplate.update(sqlUpdateFilmGenre, params);
             } else {
-                jdbcTemplate.update(SQL_INSERT_FILM_GENRE, params);
+                jdbcTemplate.update(sqlInsertFilmGenre, params);
             }
         }
         existingGenresIds.removeAll(genreIds);
         for (Integer id : existingGenresIds) {
             params.addValue("genre_id", id);
-            jdbcTemplate.update(SQL_DELETE_FILM_GENRE_BY_ID, params);
+            jdbcTemplate.update(sqlDeleteFilmGenreById, params);
         }
-        return new HashSet<>(jdbcTemplate.query(SQL_GET_GENRE_BY_FILM_ID, params, genreMapper));
+        return getByFilmId(filmId);
     }
 
     @Override
     public void deleteFilmGenres(Integer filmId) {
+        String sqlDeleteFilmGenres = "DELETE FROM public.film_genre WHERE film_id = :id";
         var params = new MapSqlParameterSource();
 
         params.addValue("id", filmId);
-        jdbcTemplate.update(SQL_DELETE_FILM_GENRES, params);
+        jdbcTemplate.update(sqlDeleteFilmGenres, params);
     }
 
     @Override
     public List<Genre> getAllGenres() {
-        return jdbcTemplate.query(SQL_GET_ALL_GENRES, genreMapper);
+        String sqlGetAllGenres = "SELECT id, name FROM public.genre";
+
+        return jdbcTemplate.query(sqlGetAllGenres, genreMapper);
     }
 
     @Override
     public Optional<Genre> getGenreById(Integer id) {
+        String sqlGetGenreById = "SELECT id, name FROM public.genre WHERE id = :id";
         var params = new MapSqlParameterSource();
 
         params.addValue("id", id);
-        return jdbcTemplate.query(SQL_GET_GENRE_BY_ID, params, genreMapper).stream().findFirst();
+        return jdbcTemplate.query(sqlGetGenreById, params, genreMapper).stream().findFirst();
     }
 
 }

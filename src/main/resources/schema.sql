@@ -42,7 +42,8 @@ CREATE TABLE IF NOT EXISTS person (
 
 CREATE TABLE IF NOT EXISTS film_like (
                                 film_id INTEGER REFERENCES film (id) ON DELETE CASCADE,
-                                liked_person_id INTEGER REFERENCES person (id) ON DELETE CASCADE
+                                liked_person_id INTEGER REFERENCES person (id) ON DELETE CASCADE,
+                                grade INTEGER NOT NULL CHECK (grade > 0 AND grade <= 10 )
 );
 
 CREATE TABLE IF NOT EXISTS friendship (
